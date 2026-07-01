@@ -115,6 +115,92 @@ None. Both findings are implementation fixes inside approved F00 scope.
 
 Attempt Result: CHANGES_REQUIRED
 
+## Attempt 2
+
+### Review Summary
+
+Approved.
+
+Repair checkpoint `29d27e5` resolves both required changes without expanding scope. QA Attempt 2 provides sufficient regression and failure-path evidence.
+
+### Scope Compliance
+
+PASS.
+
+The repair changes only `.nvmrc`, `package.json`, `Makefile`, and `DEVELOPMENT_SAFETY.md`.
+
+### Architecture Compliance
+
+PASS.
+
+The database command is local-only and non-mutating. The repository-native toolchain declarations remove the false “locked” claim and provide standard activation inputs.
+
+### Code Quality
+
+PASS.
+
+The database target is simple and transparent:
+
+`supabase db lint --local --schema public --level warning --fail-on warning`
+
+Its failure passes through Make and appears in the aggregate summary.
+
+### Security Review
+
+PASS.
+
+The canonical database target hardcodes `--local`; it provides no linked-project or DB-URL parameter. QA confirmed the unsandboxed command attempted loopback `127.0.0.1:54322` and failed with connection refused. No database mutation occurred.
+
+### Performance Review
+
+PASS.
+
+No material performance impact. Database lint runs only when development checks are invoked.
+
+### Maintainability Review
+
+PASS.
+
+Node `22.13.1` and pnpm `10.11.1` are declared in standard repository locations. Exact local Supabase commands and their safety boundary are documented next to the check contract.
+
+### Test Evidence Review
+
+PASS.
+
+QA reran the aggregate and affected regressions:
+
+* TypeScript passed.
+* Build passed with known warnings.
+* Nine safety tests passed.
+* Twelve workflow dry-runs passed.
+* Lint failed on recorded historical debt.
+* Local database lint failed on the recorded absent disposable stack.
+* Aggregate named both failures and continued through workflow checks.
+* Release-state checksum was unchanged.
+
+The two failing baseline components are not hidden and do not represent a defect in the F00 harness. Later product work must not claim production readiness until application lint passes, and no migration-owning feature may use shared staging until the disposable local database exists and passes.
+
+### Database / Migration Review
+
+PASS.
+
+F00 creates or applies no migration. The documented procedure and canonical command establish the required safety gate and correctly fail when local evidence is unavailable.
+
+### Required Changes
+
+* `F00-REV-001`: `VERIFIED`
+  * Executable local-only database lint target exists, is included in aggregate validation, and has exact reset/lint/diff documentation and current result evidence.
+* `F00-REV-002`: `VERIFIED`
+  * Node/pnpm declarations and standard activation instructions exist and match the validated toolchain.
+
+No open required changes.
+
+### Human Action Required
+
+None for F00 finalization.
+
+Attempt Result: APPROVED
+
 ## Status
 
-STATUS: CHANGES_REQUIRED
+STATUS: APPROVED

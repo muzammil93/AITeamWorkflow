@@ -28,7 +28,7 @@ Workflow, code, database, and production states are tracked separately. No state
 
 | ID | Entry | Workflow | Code | Database | Repair | QA | Review | Final Report | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| F00 | STANDARD | QA_PASS | FEATURE_BRANCH | NOT_REQUIRED | 1/2 | PASS | CHANGES_REQUIRED | — | F00-REV-001, F00-REV-002 fixed pending Reviewer verification |
+| F00 | STANDARD | REVIEW_APPROVED | READY_TO_INTEGRATE | NOT_REQUIRED | 1/2 | PASS | APPROVED | — | — |
 | F01 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F00 |
 | F02 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
@@ -517,6 +517,48 @@ Evidence:
 Reason:
 
 The bounded repair satisfies all F00 acceptance criteria and both Reviewer findings are ready for final Reviewer verification.
+
+### T-019
+
+Date: 2026-07-01 20:07 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `QA_PASS`
+
+To: `REVIEWER_RUNNING`
+
+Evidence:
+
+* F00 QA report Attempt 2 ending `STATUS: PASS`.
+* Product head `29d27e5`.
+* Findings `F00-REV-001` and `F00-REV-002` fixed pending verification.
+
+Reason:
+
+Return the repaired, QA-passed F00 change set to Reviewer.
+
+### T-020
+
+Date: 2026-07-01 20:09 (Asia/Karachi)
+
+Actor: Reviewer / Orchestrator
+
+From: `REVIEWER_RUNNING`
+
+To: `REVIEW_APPROVED`
+
+Evidence:
+
+* F00 review report Attempt 2 ending `STATUS: APPROVED`.
+* `F00-REV-001`: `VERIFIED`.
+* `F00-REV-002`: `VERIFIED`.
+* Product checkpoints `667f52a` and `29d27e5`.
+* QA report Attempt 2 ending `STATUS: PASS`.
+
+Reason:
+
+The repaired F00 implementation satisfies scope, architecture, safety, reproducibility, evidence, and maintainability requirements with no open findings.
 
 ## Status
 
