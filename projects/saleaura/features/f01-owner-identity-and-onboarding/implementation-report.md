@@ -277,6 +277,79 @@ Shared-staging migration application remains unauthorized and was not attempted.
 
 Attempt Result: IMPLEMENTATION_COMPLETE
 
+## Attempt 2
+
+### Repair Count
+
+`1/2`
+
+### Summary
+
+Repaired only the remaining `F01-QA-004` trusted-image URL bypass:
+
+* Profile persistence now accepts optional images only from `https://res.cloudinary.com`.
+* Arbitrary third-party HTTPS URLs are rejected.
+* Added a regression assertion for `https://attacker.test/tracker.png`.
+* AuthPage now clears unknown `error` query values while continuing not to display them.
+
+### Files Changed
+
+Repair checkpoint `344a58f`:
+
+* `app/auth/page.tsx`
+* `lib/profile/validation.ts`
+* `tests/f01/profile-validation.test.ts`
+
+### Code Changes
+
+No migration, persistence, routing, or API contract changed. The repair narrows the already approved optional image validation boundary.
+
+### Database / Migration Changes
+
+`NOT_REQUIRED` for this repair. The Attempt 1 migration/checksum remains unchanged and locally validated.
+
+### Migration Checksum and Recovery
+
+Unchanged:
+
+`ea8dc1eebbec3daca87b6a37b65e5da3b15b6490322651bc146627d7d6183a25`
+
+### Tests and Checks
+
+* `pnpm exec tsc --noEmit`: PASS.
+* Focused Vitest: 7/7 PASS.
+* Focused ESLint: 0 errors, one existing auth-logo image warning.
+* `git diff --check`: PASS.
+
+### Security Notes
+
+The server action cannot persist arbitrary external tracking/image hosts. Only the authenticated upload route’s Cloudinary HTTPS host is accepted.
+
+### Finding Resolutions
+
+* `F01-QA-004`: `FIXED_PENDING_VERIFICATION`
+
+### Git Checkpoint
+
+* Initial implementation: `7db3421`
+* Repair 1: `344a58f`
+* Branch: `feature/f01-owner-identity-onboarding`
+* Working tree: clean
+
+### Assumptions
+
+Cloudinary secure delivery continues to use `res.cloudinary.com`.
+
+### Known Limitations
+
+Attempt 1 limitations remain unchanged.
+
+### Blockers
+
+None.
+
+Attempt Result: IMPLEMENTATION_COMPLETE
+
 ## Status
 
 STATUS: IMPLEMENTATION_COMPLETE

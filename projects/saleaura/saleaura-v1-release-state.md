@@ -29,7 +29,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | ID | Entry | Workflow | Code | Database | Repair | QA | Review | Final Report | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
-| F01 | QA_FIRST | QA_FAIL | FEATURE_BRANCH | LOCAL_VALIDATED | 1/2 | FAIL | — | — | F01-QA-004 |
+| F01 | QA_FIRST | IMPLEMENTATION_COMPLETE | FEATURE_BRANCH | LOCAL_VALIDATED | 1/2 | FAIL | — | — | F01-QA-004 fixed pending verification |
 | F02 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
 | F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
@@ -866,6 +866,47 @@ Evidence:
 Reason:
 
 Route the remaining implementation defect to bounded repair 1 and increment repair count to `1/2`.
+
+### T-035
+
+Date: 2026-07-02 02:47 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `QA_FAIL`
+
+To: `DEVELOPER_RUNNING`
+
+Evidence:
+
+* Open finding `F01-QA-004`.
+* Repair count `1/2`.
+* Required change is limited to the approved profile image validation boundary and regression evidence.
+
+Reason:
+
+Authorize bounded repair 1 for the remaining F01 trusted-image URL bypass.
+
+### T-036
+
+Date: 2026-07-02 02:49 (Asia/Karachi)
+
+Actor: Developer / Orchestrator
+
+From: `DEVELOPER_RUNNING`
+
+To: `IMPLEMENTATION_COMPLETE`
+
+Evidence:
+
+* Product repair checkpoint `344a58f`.
+* F01 implementation report Attempt 2.
+* `F01-QA-004` marked `FIXED_PENDING_VERIFICATION`.
+* Focused type, test, lint, and diff checks pass.
+
+Reason:
+
+Complete bounded repair 1 by restricting persisted profile images to the approved Cloudinary HTTPS host.
 
 ## Status
 
