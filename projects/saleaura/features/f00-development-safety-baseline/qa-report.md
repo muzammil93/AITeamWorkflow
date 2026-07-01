@@ -150,6 +150,101 @@ The diff is limited to F00 safety documentation, command/test tooling, lint setu
 
 Attempt Result: PASS
 
+## Attempt 2
+
+### Environment
+
+Same host/toolchain as Attempt 1, using product repair checkpoint `29d27e5`.
+
+Declared repository toolchain:
+
+* `.nvmrc`: Node `22.13.1`.
+* `packageManager`: pnpm `10.11.1`.
+* Package engines: Node `>=22.13.1 <23`, pnpm `>=10 <11`.
+
+### QA Summary
+
+PASS.
+
+The two Reviewer findings are fixed from QA’s perspective and ready for Reviewer verification. Full affected regression checks passed. The aggregate now exposes both current baseline failures—historical application lint debt and an unavailable disposable local Supabase stack—while all other targets continue and pass.
+
+### Requirement / Acceptance Matrix
+
+| Requirement ID | Result | Evidence | Command or Procedure |
+| --- | --- | --- | --- |
+| `BASE-001` | PASS | Prior baseline/checkpoint evidence remains valid; repair is isolated at `29d27e5`. | Git status, log, diff, and diff-check. |
+| `BASE-002` | PASS | Eight named component categories now include explicit local database lint; Node/pnpm are repository-declared; aggregate preserves both failures. | `make check`, `make check-database`, `.nvmrc`, package declarations. |
+| `BASE-003` | PASS | Current results are honest: type/build/Python/tests/workflow pass; lint fails; local DB lint cannot connect because the disposable local stack is not running. | Full aggregate plus unsandboxed local-only DB lint retry. |
+| `BASE-004` | PASS | Exact `supabase start`, local reset, local lint, and local diff commands are documented; target hardcodes `--local` and no DB URL/linked project. | Makefile and safety-document inspection. |
+| `BASE-005` | PASS | Initial and repair checkpoints and changed files are clean and reconstructable. | `git diff --name-status ff5a7ee...29d27e5`; `git diff --check`. |
+| `BASE-006` | PASS | All twelve workflow checks still pass and live state checksum remains unchanged. | `make check-workflow`; before/after SHA-256. |
+
+### Test Cases and Actual Results
+
+1. Toolchain declaration:
+   * Parsed `package.json` and `.nvmrc`.
+   * Actual: exact Node and pnpm declarations matched the repaired documentation.
+
+2. Frozen dependency graph:
+   * `pnpm install --frozen-lockfile --ignore-scripts` under declared Node/pnpm passed after restoring the existing locked dependency store.
+   * No lockfile drift.
+
+3. Aggregate regression:
+   * TypeScript passed.
+   * Lint reproduced existing application violations and returned non-zero.
+   * Build passed with the already recorded warnings/skipped embedded gates.
+   * Python syntax passed for 17 files.
+   * Nine safety tests passed.
+   * Local DB lint ran and returned non-zero.
+   * Twelve workflow dry-runs passed.
+   * Final aggregate summary named `check-lint check-database`; it did not stop early.
+
+4. Database safety:
+   * Canonical target contains `--local`.
+   * No `--linked` or `--db-url` appears in the target.
+   * Unsandboxed read-only retry attempted `127.0.0.1:54322` only and returned `connection refused`, proving no disposable local stack is running.
+   * No database was started, reset, or mutated.
+
+5. Workflow immutability:
+   * Before SHA-256: `56fee65897b16426567239fd4b06efd10e7c05cb8b3c58769c93e456015b0875`.
+   * After SHA-256: `56fee65897b16426567239fd4b06efd10e7c05cb8b3c58769c93e456015b0875`.
+
+### Findings
+
+No QA findings.
+
+Reviewer finding observations:
+
+* `F00-REV-001`: fix validated by QA; Reviewer verification pending.
+* `F00-REV-002`: fix validated by QA; Reviewer verification pending.
+
+### Edge Cases
+
+All Attempt 1 edge cases still pass. Added checks confirm:
+
+* Missing local Supabase stack fails visibly.
+* Database check remains local-only.
+* Database failure does not prevent subsequent workflow checks.
+* Toolchain declarations do not alter dependency lock resolution.
+
+### Security and Ownership Checks
+
+PASS.
+
+No remote database selector is accepted by the canonical target. The check contacted only local loopback and failed closed.
+
+### Scope Compliance
+
+PASS.
+
+Repair changes are limited to `.nvmrc`, `package.json`, `Makefile`, and `DEVELOPMENT_SAFETY.md`.
+
+### Coverage Limitations
+
+Attempt 1 limitations remain. No local database content could be linted because the disposable local stack is not running; this is now reproducibly visible and blocks migration-owning features from staging, not F00.
+
+Attempt Result: PASS
+
 ## Status
 
 STATUS: PASS

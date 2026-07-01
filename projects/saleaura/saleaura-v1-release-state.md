@@ -28,7 +28,7 @@ Workflow, code, database, and production states are tracked separately. No state
 
 | ID | Entry | Workflow | Code | Database | Repair | QA | Review | Final Report | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| F00 | STANDARD | IMPLEMENTATION_COMPLETE | FEATURE_BRANCH | NOT_REQUIRED | 1/2 | PASS | CHANGES_REQUIRED | — | F00-REV-001, F00-REV-002 fixed pending verification |
+| F00 | STANDARD | QA_PASS | FEATURE_BRANCH | NOT_REQUIRED | 1/2 | PASS | CHANGES_REQUIRED | — | F00-REV-001, F00-REV-002 fixed pending Reviewer verification |
 | F01 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F00 |
 | F02 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
@@ -475,6 +475,48 @@ Evidence:
 Reason:
 
 Complete bounded repair 1 by adding the local-only database check and repository-native Node/pnpm declarations.
+
+### T-017
+
+Date: 2026-07-01 20:02 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `IMPLEMENTATION_COMPLETE`
+
+To: `QA_RUNNING`
+
+Evidence:
+
+* Implementation report Attempt 2 ending `STATUS: IMPLEMENTATION_COMPLETE`.
+* Product repair checkpoint `29d27e5`.
+* Repair count `1/2`.
+
+Reason:
+
+Route the bounded repair through complete affected F00 regression validation.
+
+### T-018
+
+Date: 2026-07-01 20:06 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `QA_RUNNING`
+
+To: `QA_PASS`
+
+Evidence:
+
+* F00 QA report Attempt 2.
+* Toolchain declarations validated.
+* Local-only database target validated and current missing-stack failure recorded.
+* Full affected regression and aggregate execution completed.
+* Matching release-state checksums before and after workflow validation.
+
+Reason:
+
+The bounded repair satisfies all F00 acceptance criteria and both Reviewer findings are ready for final Reviewer verification.
 
 ## Status
 
