@@ -8,17 +8,17 @@ Release-plan version: `1.0`
 
 State owner: Orchestrator
 
-Last reconciliation: 2026-07-01 (Asia/Karachi) — documentation, dependencies, artifact statuses, and both Git repositories verified
+Last reconciliation: 2026-07-01 19:31 (Asia/Karachi) — F00 dependencies, artifact status, and clean Git baselines verified
 
-Overall state: `READY_FOR_NEXT_FEATURE`
+Overall state: `FEATURE_ACTIVE`
 
 Current milestone: `M1 — Platform Foundation`
 
-Current feature: None
+Current feature: `F00 — Development Safety Baseline`
 
-Feature lock: Unlocked
+Feature lock: Locked to `F00`
 
-Next eligible feature: `F00 — Development Safety Baseline`
+Next eligible feature: None while F00 is active
 
 ## State Dimensions
 
@@ -28,7 +28,7 @@ Workflow, code, database, and production states are tracked separately. No state
 
 | ID | Entry | Workflow | Code | Database | Repair | QA | Review | Final Report | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| F00 | STANDARD | QUEUED | NOT_STARTED | NOT_REQUIRED | 0/2 | — | — | — | — |
+| F00 | STANDARD | CEO_REQUEST_CREATED | FEATURE_BRANCH | NOT_REQUIRED | 0/2 | — | — | — | — |
 | F01 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F00 |
 | F02 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
@@ -208,6 +208,28 @@ Evidence:
 Reason:
 
 Resolve repository baseline and evidence-history blockers and unlock F00.
+
+### T-004
+
+Date: 2026-07-01 19:31 (Asia/Karachi)
+
+Actor: CEO / Orchestrator
+
+From: `READY_FOR_NEXT_FEATURE`
+
+To: `CEO_REQUEST_CREATED`
+
+Evidence:
+
+* CEO instruction in the active Codex thread: “Let's start with F00”.
+* `projects/saleaura/features/f00-development-safety-baseline/ceo-request.md`.
+* Release Plan v1.0 assigns F00 `STANDARD` entry with no dependencies.
+* Clean SaleAura product baseline at `ff5a7ee`.
+* Clean AI Team baseline at `6de9843`.
+
+Reason:
+
+Activate the next eligible feature, lock the release train to F00, and record the approved request without changing production systems.
 
 ## Status
 
