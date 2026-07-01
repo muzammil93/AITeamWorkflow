@@ -29,7 +29,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | ID | Entry | Workflow | Code | Database | Repair | QA | Review | Final Report | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
-| F01 | QA_FIRST | CEO_REQUEST_CREATED | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | — |
+| F01 | QA_FIRST | BASELINE_QA_FAIL | EXISTING_UNVERIFIED | PLANNED | 0/2 | FAIL | — | — | F01-QA-001 through F01-QA-007 |
 | F02 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
 | F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
@@ -153,7 +153,7 @@ Production state: `PRODUCTION_NOT_APPLIED`
 
 ## Open Findings
 
-No feature QA or Reviewer findings recorded yet.
+F01 baseline QA findings `F01-QA-001` through `F01-QA-007` are open. Baseline failure consumes no repair cycle.
 
 Known audit findings remain assigned through the release plan, including lead RLS, unrestricted chat/payment writes, public raw inventory/embedding access, exposed functions, allowed-domain absence, and missing V1 schema capabilities.
 
@@ -654,6 +654,49 @@ Evidence:
 Reason:
 
 Activate the next eligible feature, lock the release train to F01, and authorize existing-code verification without production-system mutation.
+
+### T-025
+
+Date: 2026-07-02 02:12 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `CEO_REQUEST_CREATED`
+
+To: `EXISTING_QA_RUNNING`
+
+Evidence:
+
+* F01 CEO request ending `STATUS: CEO_REQUEST_CREATED`.
+* Master PRD ending `STATUS: PRD_READY`.
+* Master architecture ending `STATUS: ARCHITECTURE_READY`.
+* F01 requirement ownership `AUTH-001` through `SEC-AUTH-001`.
+
+Reason:
+
+Route the existing auth/profile implementation to baseline QA before any Developer involvement.
+
+### T-026
+
+Date: 2026-07-02 02:20 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `EXISTING_QA_RUNNING`
+
+To: `BASELINE_QA_FAIL`
+
+Evidence:
+
+* `projects/saleaura/features/f01-owner-identity-and-onboarding/qa-report.md`.
+* QA report terminal line is `STATUS: FAIL`.
+* Findings `F01-QA-001` through `F01-QA-007`.
+* TypeScript passes; F01-targeted lint reports 10 errors and 4 warnings.
+* Live metadata recheck blocked by Supabase connector OAuth authorization.
+
+Reason:
+
+Existing code does not satisfy approved F01 routing, safe callback, validated profile, protected upload, grant-hardening, and test-evidence requirements. Route to delta Product Manager without consuming a repair cycle.
 
 ## Status
 
