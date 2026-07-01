@@ -29,7 +29,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | ID | Entry | Workflow | Code | Database | Repair | QA | Review | Final Report | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
-| F01 | QA_FIRST | QA_PASS | FEATURE_BRANCH | LOCAL_VALIDATED | 1/2 | PASS | — | — | — |
+| F01 | QA_FIRST | REVIEW_APPROVED | FEATURE_BRANCH | LOCAL_VALIDATED | 1/2 | PASS | APPROVED | — | — |
 | F02 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
 | F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
@@ -949,6 +949,47 @@ Evidence:
 Reason:
 
 Accept bounded repair 1 and complete F01 QA with no open findings.
+
+### T-039
+
+Date: 2026-07-02 02:47 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `QA_PASS`
+
+To: `REVIEWER_RUNNING`
+
+Evidence:
+
+* F01 QA report ending `STATUS: PASS`.
+* Product diff `162e947...344a58f`.
+* Repair count `1/2`.
+
+Reason:
+
+Route the complete F01 changed-code delta to technical review.
+
+### T-040
+
+Date: 2026-07-02 02:47 (Asia/Karachi)
+
+Actor: Reviewer / Orchestrator
+
+From: `REVIEWER_RUNNING`
+
+To: `REVIEW_APPROVED`
+
+Evidence:
+
+* F01 review report ending `STATUS: APPROVED`.
+* Product diff `162e947...344a58f`.
+* QA status `PASS` with no open findings.
+* Database state `LOCAL_VALIDATED`.
+
+Reason:
+
+Approve F01 for release-branch integration after changed-code, security, test, and migration review.
 
 ## Status
 
