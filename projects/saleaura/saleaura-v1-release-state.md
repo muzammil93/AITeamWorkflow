@@ -82,7 +82,9 @@ Pre-F00 baseline commit: `6de9843`
 
 Final F00 evidence checkpoint: `c3278ee`
 
-State: Clean and checkpointed locally; branch is ahead of remote
+Final F01 evidence checkpoint: `abf7aba`
+
+State: Clean and checkpointed locally through F01; branch is ahead of remote
 
 Required action: None for local F02 continuation. Remote push has not been performed.
 
@@ -1038,6 +1040,26 @@ Evidence:
 Reason:
 
 Unlock F02, release the single-feature lock, and continue M1 without crossing a milestone or production gate.
+
+### T-043
+
+Date: 2026-07-02 02:50 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `READY_FOR_NEXT_FEATURE`
+
+To: `READY_FOR_NEXT_FEATURE`
+
+Evidence:
+
+* Final F01 evidence/state checkpoint `abf7aba`.
+* Clean AI Team working tree immediately after the checkpoint.
+* Integrated product head `b48d8bc`.
+
+Reason:
+
+Reconcile the final evidence commit reference without changing feature eligibility or milestone state.
 
 ## Status
 
