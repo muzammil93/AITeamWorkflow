@@ -349,6 +349,80 @@ PASS. The implementation remains within F01.
 
 Attempt Result: FAIL
 
+## Attempt 3
+
+### Environment
+
+* QA mode: `BOUNDED_REPAIR_REGRESSION`
+* Product checkpoint: `344a58f`
+* Node.js `22.13.1`, pnpm `10.11.1`
+* Database evidence: independent Attempt 2 disposable PostgreSQL verification; migration checksum unchanged
+* Shared staging/production: not contacted
+
+### QA Summary
+
+PASS.
+
+Bounded repair 1 closes the remaining trusted-image bypass. The server validator now accepts only HTTPS URLs on the approved Cloudinary delivery hostname, and the regression suite rejects the previously accepted attacker-host input. Complete F01 regression checks pass.
+
+### Requirement / Acceptance Matrix
+
+| Requirement ID | Result | Evidence |
+| --- | --- | --- |
+| `AUTH-001` | PASS | Google remains the only exposed authentication provider. |
+| `AUTH-002` | PASS | Callback and trigger behavior remain conflict-safe and idempotent. |
+| `AUTH-003` | PASS | Complete and incomplete owner routing tests pass. |
+| `AUTH-004` | PASS | Missing, invalid, and unavailable session/profile paths fail safely. |
+| `AUTH-005` | PASS | Secure logout behavior is preserved. |
+| `AUTH-006` | PASS | Exact-origin redirect and stable-error tests pass; unknown error queries are cleared without display. |
+| `PROFILE-001` | PASS | Required/contact/localization validation passes and optional images are restricted to approved Cloudinary HTTPS URLs. |
+| `PROFILE-002` | PASS | Exact authenticated owner updates and single-profile behavior remain covered. |
+| `PROFILE-003` | PASS | Browser mutation is denied; upload and persisted-image boundaries are authenticated and bounded. |
+| `SEC-AUTH-001` | PASS | Independent local ACL/RLS/migration evidence remains valid and the migration checksum is unchanged. |
+
+### Test Cases and Actual Results
+
+* `pnpm exec tsc --noEmit`: PASS.
+* `pnpm exec vitest run`: PASS — 8 files, 32 tests.
+* Targeted changed-file ESLint: PASS with 0 errors and 2 image-element warnings.
+* `pnpm run build`: PASS — optimized production build generated 31 pages.
+* `git diff --check 162e947...344a58f`: PASS.
+* Migration SHA-256 remains `ea8dc1eebbec3daca87b6a37b65e5da3b15b6490322651bc146627d7d6183a25`.
+* Regression input `https://attacker.test/tracker.png`: rejected.
+* Approved Cloudinary HTTPS profile URL: accepted.
+
+### Findings
+
+All baseline and post-implementation findings are verified:
+
+* `F01-QA-001`: `VERIFIED`
+* `F01-QA-002`: `VERIFIED`
+* `F01-QA-003`: `VERIFIED`
+* `F01-QA-004`: `VERIFIED`
+* `F01-QA-005`: `VERIFIED`
+* `F01-QA-006`: `VERIFIED`
+* `F01-QA-007`: `VERIFIED`
+
+No open F01 QA findings remain.
+
+### Security and Ownership Checks
+
+PASS.
+
+The affected trusted-image boundary passes regression testing. Independent database ownership, grants, trigger, and RLS evidence from Attempt 2 remains applicable because no SQL changed and the migration checksum is identical.
+
+### Scope Compliance
+
+PASS. Repair 1 is limited to trusted image-host validation, its regression assertion, and safe clearing of unknown auth error queries.
+
+### Coverage Limitations
+
+* No real Google provider session was available.
+* Live staging metadata was not rechecked.
+* These are deployment-environment validations, not deterministic failures in the locally validated F01 implementation.
+
+Attempt Result: PASS
+
 ## Status
 
-STATUS: FAIL
+STATUS: PASS

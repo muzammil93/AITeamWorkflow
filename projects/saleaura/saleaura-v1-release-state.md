@@ -29,7 +29,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | ID | Entry | Workflow | Code | Database | Repair | QA | Review | Final Report | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
-| F01 | QA_FIRST | IMPLEMENTATION_COMPLETE | FEATURE_BRANCH | LOCAL_VALIDATED | 1/2 | FAIL | — | — | F01-QA-004 fixed pending verification |
+| F01 | QA_FIRST | QA_PASS | FEATURE_BRANCH | LOCAL_VALIDATED | 1/2 | PASS | — | — | — |
 | F02 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
 | F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
@@ -907,6 +907,48 @@ Evidence:
 Reason:
 
 Complete bounded repair 1 by restricting persisted profile images to the approved Cloudinary HTTPS host.
+
+### T-037
+
+Date: 2026-07-02 02:50 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `IMPLEMENTATION_COMPLETE`
+
+To: `QA_RUNNING`
+
+Evidence:
+
+* F01 implementation report Attempt 2 ending `STATUS: IMPLEMENTATION_COMPLETE`.
+* Product head `344a58f`.
+* Repair count `1/2`.
+
+Reason:
+
+Route bounded repair 1 through complete affected F01 regression validation.
+
+### T-038
+
+Date: 2026-07-02 02:47 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `QA_RUNNING`
+
+To: `QA_PASS`
+
+Evidence:
+
+* F01 QA report Attempt 3 ending `STATUS: PASS`.
+* Product checkpoint `344a58f`.
+* TypeScript, 32 F01 tests, targeted lint, production build, and diff checks pass.
+* `F01-QA-004` is verified.
+* Migration checksum is unchanged from the independently validated disposable PostgreSQL run.
+
+Reason:
+
+Accept bounded repair 1 and complete F01 QA with no open findings.
 
 ## Status
 
