@@ -28,7 +28,7 @@ Workflow, code, database, and production states are tracked separately. No state
 
 | ID | Entry | Workflow | Code | Database | Repair | QA | Review | Final Report | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| F00 | STANDARD | CEO_REQUEST_CREATED | FEATURE_BRANCH | NOT_REQUIRED | 0/2 | — | — | — | — |
+| F00 | STANDARD | DEVELOPER_RUNNING | FEATURE_BRANCH | NOT_REQUIRED | 0/2 | — | — | — | — |
 | F01 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F00 |
 | F02 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
@@ -230,6 +230,104 @@ Evidence:
 Reason:
 
 Activate the next eligible feature, lock the release train to F00, and record the approved request without changing production systems.
+
+### T-005
+
+Date: 2026-07-01 19:33 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `CEO_REQUEST_CREATED`
+
+To: `PRODUCT_MANAGER_RUNNING`
+
+Evidence:
+
+* F00 CEO request ends with `STATUS: CEO_REQUEST_CREATED`.
+* Release Plan v1.0 requirement ownership for `BASE-001` through `BASE-006`.
+
+Reason:
+
+Route the active standard feature to Product Manager scope definition.
+
+### T-006
+
+Date: 2026-07-01 19:36 (Asia/Karachi)
+
+Actor: Product Manager / Orchestrator
+
+From: `PRODUCT_MANAGER_RUNNING`
+
+To: `PRD_READY`
+
+Evidence:
+
+* `projects/saleaura/features/f00-development-safety-baseline/prd.md`.
+* PRD terminal line is `STATUS: PRD_READY`.
+* Scope is traceable to `BASE-001` through `BASE-006`.
+
+Reason:
+
+Accept the testable F00 scope with no unresolved product clarification.
+
+### T-007
+
+Date: 2026-07-01 19:36 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `PRD_READY`
+
+To: `ARCHITECT_RUNNING`
+
+Evidence:
+
+* F00 PRD ending `STATUS: PRD_READY`.
+* Master SaleAura V1 architecture and release-plan constraints.
+
+Reason:
+
+Route the approved safety-baseline requirements to technical design.
+
+### T-008
+
+Date: 2026-07-01 19:40 (Asia/Karachi)
+
+Actor: Architect / Orchestrator
+
+From: `ARCHITECT_RUNNING`
+
+To: `ARCHITECTURE_READY`
+
+Evidence:
+
+* `projects/saleaura/features/f00-development-safety-baseline/architecture.md`.
+* Architecture terminal line is `STATUS: ARCHITECTURE_READY`.
+* Design is limited to repository-native checks, safety documentation, and non-mutating workflow validation.
+
+Reason:
+
+Accept the implementation-ready F00 technical design.
+
+### T-009
+
+Date: 2026-07-01 19:40 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `ARCHITECTURE_READY`
+
+To: `DEVELOPER_RUNNING`
+
+Evidence:
+
+* F00 PRD ending `STATUS: PRD_READY`.
+* F00 architecture ending `STATUS: ARCHITECTURE_READY`.
+* Repair count remains `0/2`.
+
+Reason:
+
+Authorize the initial F00 implementation within the recorded file and environment boundaries.
 
 ## Status
 
