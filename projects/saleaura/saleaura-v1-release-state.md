@@ -8,17 +8,17 @@ Release-plan version: `1.0`
 
 State owner: Orchestrator
 
-Last reconciliation: 2026-07-01 20:12 (Asia/Karachi) — F00 artifacts, statuses, Git integration, final evidence checkpoint, checks, findings, and dependencies verified
+Last reconciliation: 2026-07-02 02:10 (Asia/Karachi) — F01 dependency, artifact status, and clean Git baselines verified
 
-Overall state: `READY_FOR_NEXT_FEATURE`
+Overall state: `FEATURE_ACTIVE`
 
 Current milestone: `M1 — Platform Foundation`
 
-Current feature: None
+Current feature: `F01 — Owner Identity and Onboarding`
 
-Feature lock: Unlocked
+Feature lock: Locked to `F01`
 
-Next eligible feature: `F01 — Owner Identity and Onboarding`
+Next eligible feature: None while F01 is active
 
 ## State Dimensions
 
@@ -29,7 +29,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | ID | Entry | Workflow | Code | Database | Repair | QA | Review | Final Report | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
-| F01 | QA_FIRST | QUEUED | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | — |
+| F01 | QA_FIRST | CEO_REQUEST_CREATED | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | — |
 | F02 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
 | F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
@@ -631,6 +631,29 @@ Evidence:
 Reason:
 
 Reconcile the final evidence commit reference without changing feature eligibility or milestone state.
+
+### T-024
+
+Date: 2026-07-02 02:10 (Asia/Karachi)
+
+Actor: CEO / Orchestrator
+
+From: `READY_FOR_NEXT_FEATURE`
+
+To: `CEO_REQUEST_CREATED`
+
+Evidence:
+
+* CEO instruction in the active Codex thread: “Start F01”.
+* `projects/saleaura/features/f01-owner-identity-and-onboarding/ceo-request.md`.
+* Release Plan v1.0 assigns F01 `QA_FIRST` entry with F00 as its only dependency.
+* F00 is integrated at product commit `162e947`.
+* Clean product repository at `162e947`.
+* Clean AI Team repository at `73b672f`.
+
+Reason:
+
+Activate the next eligible feature, lock the release train to F01, and authorize existing-code verification without production-system mutation.
 
 ## Status
 
