@@ -28,7 +28,7 @@ Workflow, code, database, and production states are tracked separately. No state
 
 | ID | Entry | Workflow | Code | Database | Repair | QA | Review | Final Report | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| F00 | STANDARD | IMPLEMENTATION_COMPLETE | FEATURE_BRANCH | NOT_REQUIRED | 0/2 | — | — | — | — |
+| F00 | STANDARD | QA_PASS | FEATURE_BRANCH | NOT_REQUIRED | 0/2 | PASS | — | — | — |
 | F01 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F00 |
 | F02 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
@@ -350,6 +350,50 @@ Evidence:
 Reason:
 
 Complete the approved F00 safety harness and record all actual baseline results, including the historical lint failure, for independent QA.
+
+### T-011
+
+Date: 2026-07-01 19:46 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `IMPLEMENTATION_COMPLETE`
+
+To: `QA_RUNNING`
+
+Evidence:
+
+* F00 PRD ending `STATUS: PRD_READY`.
+* F00 architecture ending `STATUS: ARCHITECTURE_READY`.
+* F00 implementation report ending `STATUS: IMPLEMENTATION_COMPLETE`.
+* Clean product checkpoint `667f52a`.
+
+Reason:
+
+Route the completed initial implementation to independent post-implementation validation.
+
+### T-012
+
+Date: 2026-07-01 19:49 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `QA_RUNNING`
+
+To: `QA_PASS`
+
+Evidence:
+
+* `projects/saleaura/features/f00-development-safety-baseline/qa-report.md`.
+* QA report terminal line is `STATUS: PASS`.
+* Nine safety unit tests passed.
+* Twelve workflow dry-run checks passed.
+* TypeScript and build passed; lint failure was correctly surfaced and recorded as pre-existing baseline debt.
+* Matching release-state checksums before and after the dry-run.
+
+Reason:
+
+All `BASE-001` through `BASE-006` acceptance criteria passed without application, database, staging, production, billing, deployment, or legal mutation.
 
 ## Status
 
