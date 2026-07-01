@@ -28,7 +28,7 @@ Workflow, code, database, and production states are tracked separately. No state
 
 | ID | Entry | Workflow | Code | Database | Repair | QA | Review | Final Report | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| F00 | STANDARD | REVIEW_CHANGES_REQUIRED | FEATURE_BRANCH | NOT_REQUIRED | 1/2 | PASS | CHANGES_REQUIRED | — | F00-REV-001, F00-REV-002 |
+| F00 | STANDARD | IMPLEMENTATION_COMPLETE | FEATURE_BRANCH | NOT_REQUIRED | 1/2 | PASS | CHANGES_REQUIRED | — | F00-REV-001, F00-REV-002 fixed pending verification |
 | F01 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F00 |
 | F02 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
@@ -434,6 +434,47 @@ Evidence:
 Reason:
 
 The initial implementation lacks an executable database check target and a repository-native Node/pnpm toolchain lock, so F00 reproducibility is incomplete.
+
+### T-015
+
+Date: 2026-07-01 19:55 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `REVIEW_CHANGES_REQUIRED`
+
+To: `DEVELOPER_RUNNING`
+
+Evidence:
+
+* Reviewer findings `F00-REV-001` and `F00-REV-002`.
+* Repair count `1/2`.
+* Both findings are implementation fixes within the approved PRD and architecture.
+
+Reason:
+
+Authorize the first bounded repair for the missing database command and toolchain declaration only.
+
+### T-016
+
+Date: 2026-07-01 20:01 (Asia/Karachi)
+
+Actor: Developer / Orchestrator
+
+From: `DEVELOPER_RUNNING`
+
+To: `IMPLEMENTATION_COMPLETE`
+
+Evidence:
+
+* Product repair checkpoint `29d27e5`.
+* F00 implementation report Attempt 2.
+* Findings `F00-REV-001` and `F00-REV-002` marked `FIXED_PENDING_VERIFICATION`.
+* Clean product working tree.
+
+Reason:
+
+Complete bounded repair 1 by adding the local-only database check and repository-native Node/pnpm declarations.
 
 ## Status
 

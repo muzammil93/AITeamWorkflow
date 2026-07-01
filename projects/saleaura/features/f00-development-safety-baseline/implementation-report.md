@@ -177,6 +177,104 @@ None. The failing application lint baseline is an expected recorded result under
 
 Attempt Result: IMPLEMENTATION_COMPLETE
 
+## Attempt 2
+
+### Repair Count
+
+`1/2`
+
+### Summary
+
+Repaired only Reviewer findings `F00-REV-001` and `F00-REV-002`:
+
+* Added an explicit local-only Supabase database lint target and included it in aggregate validation.
+* Added exact local Supabase start/reset/lint/diff commands and prohibited remote substitutions in the safety contract.
+* Declared Node.js `22.13.1` in `.nvmrc` and package engines.
+* Declared pnpm `10.11.1` through `packageManager` and the supported pnpm major through package engines.
+* Documented standard `nvm`/Corepack activation without a user-specific path.
+
+### Files Changed
+
+Repair checkpoint `29d27e5`:
+
+* `.nvmrc`
+* `DEVELOPMENT_SAFETY.md`
+* `Makefile`
+* `package.json`
+
+No lockfile change was required because Node/pnpm declarations do not alter the dependency graph.
+
+### Code Changes
+
+* Added `make check-database`.
+* The target executes only:
+
+  `supabase db lint --local --schema public --level warning --fail-on warning`
+
+* Added `check-database` to `make check`, preserving honest aggregate failure when a disposable local database is unavailable.
+* Pinned the documented local toolchain and added standard activation/setup commands.
+
+### Database / Migration Changes
+
+`NOT_REQUIRED`
+
+No database was created, reset, migrated, or mutated. The new database check is local-only and read-only.
+
+### Migration Checksum and Recovery
+
+`NOT_APPLICABLE`
+
+### Tests and Checks
+
+* Frozen dependency install under the declared Node `22.13.1` / pnpm `10.11.1` toolchain: passed.
+* TypeScript: passed.
+* Build: passed with the previously recorded warnings and in-build skipped gates.
+* Python syntax: 17 files passed.
+* Python tests: nine passed.
+* Workflow dry-run: twelve checks passed.
+* Lint: continued to fail on the same historical application debt.
+* `make check-database`: returned non-zero because no disposable local Supabase PostgreSQL process was listening on `127.0.0.1:54322`. An unsandboxed read-only retry confirmed `connection refused`; it did not use a linked project or remote URL.
+* `make check`: ran the newly added database target and identified both current baseline failures: `check-lint` and `check-database`.
+* `git diff --check`: passed.
+
+The database failure is the required honest F00 baseline result. `DEVELOPMENT_SAFETY.md` states that a migration-owning feature cannot progress to shared staging until its disposable local stack and representative schema are available and pass.
+
+### Security Notes
+
+The database target hardcodes `--local` and does not accept a DB URL or linked-project flag. Documentation explicitly prohibits replacing it with `--linked` or `--db-url`.
+
+### Finding Resolutions
+
+* `F00-REV-001`: `FIXED_PENDING_VERIFICATION`
+  * Added executable local-only database lint target, aggregate coverage, exact local reset/lint/diff commands, and current failure evidence.
+* `F00-REV-002`: `FIXED_PENDING_VERIFICATION`
+  * Added `.nvmrc`, Node/pnpm package declarations, and standard activation instructions.
+
+### Git Checkpoint
+
+* Base: `ff5a7ee`
+* Initial implementation: `667f52a`
+* Repair checkpoint: `29d27e5`
+* Product branch: `feature/f00-development-safety-baseline`
+* Product working tree after repair checkpoint: clean
+
+Safe reversal remains an ordered review of `29d27e5` then `667f52a`, using revert rather than reset after preserving later/user-owned work.
+
+### Assumptions
+
+* `nvm` and Corepack are documented activation mechanisms; another version manager may consume the same `.nvmrc`/package declarations.
+* A local Supabase stack is not required to be started or mutated by F00; its absence must remain visible.
+
+### Known Limitations
+
+All Attempt 1 baseline limitations remain. In addition, the local database check is currently unavailable because the disposable local Supabase stack/configured baseline is not running. This blocks future shared-staging migration work, not completion of the non-migration F00 safety foundation.
+
+### Blockers
+
+None for F00.
+
+Attempt Result: IMPLEMENTATION_COMPLETE
+
 ## Status
 
 STATUS: IMPLEMENTATION_COMPLETE
