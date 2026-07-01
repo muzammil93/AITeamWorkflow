@@ -29,7 +29,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | ID | Entry | Workflow | Code | Database | Repair | QA | Review | Final Report | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
-| F01 | QA_FIRST | IMPLEMENTATION_COMPLETE | FEATURE_BRANCH | LOCAL_VALIDATED | 0/2 | FAIL | — | — | F01-QA-001 through F01-QA-007 fixed pending verification |
+| F01 | QA_FIRST | QA_FAIL | FEATURE_BRANCH | LOCAL_VALIDATED | 1/2 | FAIL | — | — | F01-QA-004 |
 | F02 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
 | F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
@@ -153,7 +153,7 @@ Production state: `PRODUCTION_NOT_APPLIED`
 
 ## Open Findings
 
-F01 baseline QA findings `F01-QA-001` through `F01-QA-007` are open. Baseline failure consumes no repair cycle.
+F01 findings `F01-QA-001`, `F01-QA-002`, `F01-QA-003`, `F01-QA-005`, `F01-QA-006`, and `F01-QA-007` are verified. `F01-QA-004` remains open after post-implementation QA; repair count is `1/2`.
 
 Known audit findings remain assigned through the release plan, including lead RLS, unrestricted chat/payment writes, public raw inventory/embedding access, exposed functions, allowed-domain absence, and missing V1 schema capabilities.
 
@@ -823,6 +823,49 @@ Evidence:
 Reason:
 
 Complete the approved F01 delta and mark all baseline findings fixed pending independent QA.
+
+### T-033
+
+Date: 2026-07-02 02:42 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `IMPLEMENTATION_COMPLETE`
+
+To: `QA_RUNNING`
+
+Evidence:
+
+* F01 implementation report ending `STATUS: IMPLEMENTATION_COMPLETE`.
+* Product checkpoint `7db3421`.
+* Database state `LOCAL_VALIDATED`.
+* Repair count remains `0/2`.
+
+Reason:
+
+Route the completed F01 delta through post-implementation QA and all baseline finding regressions.
+
+### T-034
+
+Date: 2026-07-02 02:46 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `QA_RUNNING`
+
+To: `QA_FAIL`
+
+Evidence:
+
+* F01 QA report Attempt 2.
+* Product checkpoint `7db3421`.
+* Six baseline findings verified.
+* `F01-QA-004` remains open because arbitrary third-party HTTPS profile image URLs pass the trusted server validator.
+* Independent disposable QA database migration and ACL/RLS verification passes.
+
+Reason:
+
+Route the remaining implementation defect to bounded repair 1 and increment repair count to `1/2`.
 
 ## Status
 

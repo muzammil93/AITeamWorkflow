@@ -251,6 +251,104 @@ Existing implementation does not introduce prohibited providers, staff/team acco
 
 Attempt Result: FAIL
 
+## Attempt 2
+
+### Environment
+
+* QA mode: `POST_IMPLEMENTATION`
+* Product checkpoint: `7db3421`
+* PostgreSQL: `16.14`, disposable QA database `saleaura_f01_qa`
+* Node.js `22.13.1`, pnpm `10.11.1`
+* Shared staging/production: not contacted
+
+### QA Summary
+
+FAIL.
+
+The F01 delta fixes six of the seven baseline findings and provides strong executable evidence. One `PROFILE-001` / `PROFILE-003` bypass remains at checkpoint `7db3421`: `saveOwnerProfile` validates that the optional image is HTTPS, but does not require it to be a URL produced by the authenticated Cloudinary upload path. A caller can invoke the server action directly with an arbitrary third-party HTTPS image/tracking URL.
+
+This post-implementation failure consumes repair cycle `1/2`.
+
+### Requirement / Acceptance Matrix
+
+| Requirement ID | Result | Evidence | Command or Procedure |
+| --- | --- | --- | --- |
+| `AUTH-001` | PASS | Google remains the only exposed provider. | Static auth page inspection and targeted tests. |
+| `AUTH-002` | PASS | Callback reuses existing profiles, uses conflict-safe missing-profile upsert, confirms persistence, and fails safely. Trigger is conflict-safe. | Callback tests plus disposable PostgreSQL trigger test. |
+| `AUTH-003` | PASS | Incomplete owners route to profile; complete owners route to dashboard. | Five routing tests and middleware inspection. |
+| `AUTH-004` | PASS | Unauthenticated/invalid sessions route to stable auth recovery; unavailable profiles fail closed without loops. | Routing tests and middleware inspection. |
+| `AUTH-005` | PASS | Existing secure logout behavior is preserved. | Sidebar inspection and successful build/typecheck. |
+| `AUTH-006` | PASS | Exact origins, HTTPS/non-local, approved ports, stable errors, and safe fallback are tested. | Six redirect tests, auth-error tests, and four callback tests. |
+| `PROFILE-001` | FAIL | Required/contact/localization validation passes, but optional image URL accepts any HTTPS host rather than the trusted Cloudinary path. | Direct validator test with `https://attacker.test/tracker.png` at checkpoint `7db3421`. |
+| `PROFILE-002` | PASS | Exact authenticated profile ID is updated; callback/profile paths do not create duplicates. | Code inspection, callback tests, local trigger evidence. |
+| `PROFILE-003` | FAIL | Generic table mutation is denied and upload is authenticated, but direct server-action input can persist an arbitrary third-party HTTPS image URL. | Server-action/validator inspection. |
+| `SEC-AUTH-001` | PASS | Function execute and direct browser mutations are denied; owner SELECT RLS and service-role writes pass. | Independent disposable QA database migration/verification. |
+
+### Test Cases and Actual Results
+
+* `pnpm exec tsc --noEmit`: PASS.
+* `pnpm exec vitest run`: PASS — 8 files, 32 tests at checkpoint.
+* Targeted changed-file ESLint: PASS with 0 errors and 2 image-element warnings.
+* `pnpm run build`: PASS — 31 static pages, existing warnings recorded.
+* F00 Python safety tests: 9/9 PASS.
+* Workflow dry-runs: 12/12 PASS.
+* `git diff --check 162e947...7db3421`: PASS.
+* Independent local migration execution: PASS.
+* Direct authenticated profile INSERT/UPDATE/DELETE: correctly denied with `42501`.
+* Owner RLS SELECT: exactly one row.
+* Trigger creation: exactly one new profile.
+* Existing completed Growth profile: preserved.
+* Trusted service-role update: PASS.
+* Direct validator input `https://attacker.test/tracker.png`: accepted at checkpoint, FAIL.
+
+### Findings
+
+Findings verified:
+
+* `F01-QA-001`: `VERIFIED`
+* `F01-QA-002`: `VERIFIED`
+* `F01-QA-003`: `VERIFIED`
+* `F01-QA-005`: `VERIFIED`
+* `F01-QA-006`: `VERIFIED`
+* `F01-QA-007`: `VERIFIED`
+
+Remaining finding:
+
+#### `F01-QA-004`
+
+* Requirement ID: `PROFILE-001`, `PROFILE-003`
+* Severity: High
+* State: `OPEN`
+* Title: Trusted profile action still accepts arbitrary HTTPS image URLs
+* Reproduction steps:
+  1. Invoke `saveOwnerProfile` with otherwise valid data.
+  2. Set `profilePictureUrl` to `https://attacker.test/tracker.png`.
+  3. Observe validation result.
+* Expected result: Optional persisted profile images are absent/placeholders or HTTPS Cloudinary URLs produced by the authenticated upload boundary.
+* Actual result: Any syntactically valid HTTPS URL is accepted.
+* Evidence: `lib/profile/validation.ts` at `7db3421`.
+* Suggested fix direction: Restrict persisted image URLs to the approved Cloudinary HTTPS hostname and add a regression assertion. Also clear unknown auth error query values while touching the safe error parser if needed.
+
+### Edge Cases
+
+All baseline edge paths now pass except the direct arbitrary-HTTPS image input described above.
+
+### Security and Ownership Checks
+
+FAIL only for the remaining third-party image URL bypass. Database ownership/grant boundaries pass.
+
+### Scope Compliance
+
+PASS. The implementation remains within F01.
+
+### Coverage Limitations
+
+* No real Google provider session.
+* No live staging metadata recheck.
+* These do not cause this attempt’s failure; the deterministic image bypass does.
+
+Attempt Result: FAIL
+
 ## Status
 
 STATUS: FAIL
