@@ -28,7 +28,7 @@ Workflow, code, database, and production states are tracked separately. No state
 
 | ID | Entry | Workflow | Code | Database | Repair | QA | Review | Final Report | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| F00 | STANDARD | QA_PASS | FEATURE_BRANCH | NOT_REQUIRED | 0/2 | PASS | — | — | — |
+| F00 | STANDARD | REVIEW_CHANGES_REQUIRED | FEATURE_BRANCH | NOT_REQUIRED | 1/2 | PASS | CHANGES_REQUIRED | — | F00-REV-001, F00-REV-002 |
 | F01 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F00 |
 | F02 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
@@ -394,6 +394,46 @@ Evidence:
 Reason:
 
 All `BASE-001` through `BASE-006` acceptance criteria passed without application, database, staging, production, billing, deployment, or legal mutation.
+
+### T-013
+
+Date: 2026-07-01 19:50 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `QA_PASS`
+
+To: `REVIEWER_RUNNING`
+
+Evidence:
+
+* F00 QA report ending `STATUS: PASS`.
+* Clean product checkpoint `667f52a`.
+* No open QA findings.
+
+Reason:
+
+Route the QA-passed F00 change set and evidence to independent changed-code review.
+
+### T-014
+
+Date: 2026-07-01 19:54 (Asia/Karachi)
+
+Actor: Reviewer / Orchestrator
+
+From: `REVIEWER_RUNNING`
+
+To: `REVIEW_CHANGES_REQUIRED`
+
+Evidence:
+
+* `projects/saleaura/features/f00-development-safety-baseline/review-report.md`.
+* Review report terminal line is `STATUS: CHANGES_REQUIRED`.
+* Open findings `F00-REV-001` and `F00-REV-002`.
+
+Reason:
+
+The initial implementation lacks an executable database check target and a repository-native Node/pnpm toolchain lock, so F00 reproducibility is incomplete.
 
 ## Status
 
