@@ -29,7 +29,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | ID | Entry | Workflow | Code | Database | Repair | QA | Review | Final Report | Blocker |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
-| F01 | QA_FIRST | BASELINE_QA_FAIL | EXISTING_UNVERIFIED | PLANNED | 0/2 | FAIL | — | — | F01-QA-001 through F01-QA-007 |
+| F01 | QA_FIRST | DEVELOPER_RUNNING | FEATURE_BRANCH | PLANNED | 0/2 | FAIL | — | — | F01-QA-001 through F01-QA-007 |
 | F02 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
 | F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
@@ -697,6 +697,107 @@ Evidence:
 Reason:
 
 Existing code does not satisfy approved F01 routing, safe callback, validated profile, protected upload, grant-hardening, and test-evidence requirements. Route to delta Product Manager without consuming a repair cycle.
+
+### T-027
+
+Date: 2026-07-02 02:21 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `BASELINE_QA_FAIL`
+
+To: `PRODUCT_MANAGER_RUNNING`
+
+Evidence:
+
+* F01 baseline QA report ending `STATUS: FAIL`.
+* Open findings `F01-QA-001` through `F01-QA-007`.
+* Baseline failure repair count remains `0/2`.
+
+Reason:
+
+Route verified existing-code gaps to a delta PRD limited to F01 requirement ownership.
+
+### T-028
+
+Date: 2026-07-02 02:25 (Asia/Karachi)
+
+Actor: Product Manager / Orchestrator
+
+From: `PRODUCT_MANAGER_RUNNING`
+
+To: `PRD_READY`
+
+Evidence:
+
+* `projects/saleaura/features/f01-owner-identity-and-onboarding/prd.md`.
+* PRD terminal line is `STATUS: PRD_READY`.
+* Delta scope maps only `F01-QA-001` through `F01-QA-007` to F01 requirement IDs.
+
+Reason:
+
+Accept the testable F01 delta without reopening locked product decisions.
+
+### T-029
+
+Date: 2026-07-02 02:25 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `PRD_READY`
+
+To: `ARCHITECT_RUNNING`
+
+Evidence:
+
+* F01 delta PRD ending `STATUS: PRD_READY`.
+* F01 baseline QA findings.
+* Master SaleAura V1 architecture.
+
+Reason:
+
+Route the approved F01 delta to technical design.
+
+### T-030
+
+Date: 2026-07-02 02:30 (Asia/Karachi)
+
+Actor: Architect / Orchestrator
+
+From: `ARCHITECT_RUNNING`
+
+To: `ARCHITECTURE_READY`
+
+Evidence:
+
+* `projects/saleaura/features/f01-owner-identity-and-onboarding/architecture.md`.
+* Architecture terminal line is `STATUS: ARCHITECTURE_READY`.
+* Design is limited to F01 callback, routing, profile, upload, grant, migration, and test gaps.
+
+Reason:
+
+Accept the implementation-ready F01 delta architecture.
+
+### T-031
+
+Date: 2026-07-02 02:30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `ARCHITECTURE_READY`
+
+To: `DEVELOPER_RUNNING`
+
+Evidence:
+
+* F01 delta PRD ending `STATUS: PRD_READY`.
+* F01 delta architecture ending `STATUS: ARCHITECTURE_READY`.
+* Baseline QA findings `F01-QA-001` through `F01-QA-007`.
+* Repair count remains `0/2`.
+
+Reason:
+
+Authorize the initial delta implementation and additive local-only migration work.
 
 ## Status
 
