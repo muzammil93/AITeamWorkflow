@@ -10,7 +10,7 @@ State owner: Orchestrator
 
 Last reconciliation: 2026-07-02 13:45 (Asia/Karachi) — F02 dependency, artifact status, and clean Git baselines verified
 
-Overall state: `FEATURE_ACTIVE`
+Overall state: `EXTERNAL_AUTH_REQUIRED`
 
 Current milestone: `M1 — Platform Foundation`
 
@@ -30,7 +30,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
 | F01 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | LOCAL_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
-| F02 | QA_FIRST | QA_RUNNING | FEATURE_BRANCH | LOCAL_VALIDATED | 1/2 | FAIL | — | — | Polar sandbox catalog requires separate correction before live checkout |
+| F02 | QA_FIRST | EXTERNAL_AUTH_REQUIRED | FEATURE_BRANCH | LOCAL_VALIDATED | 1/2 | FAIL | — | — | B-004 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
 | F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
 | F05 | STANDARD | BLOCKED_DEPENDENCY | NOT_STARTED | PLANNED | 0/2 | — | — | — | F03, F04 |
@@ -148,6 +148,22 @@ Required action: None.
 Owner: CEO
 
 Resolution reference: CEO approved Release Plan v1.0 on 2026-07-01 (Asia/Karachi).
+
+### B-004 — Exact Polar Sandbox Products
+
+Feature: F02
+
+State: `OPEN`
+
+Reason: The configured Polar sandbox has a USD 20 “Standard” recurring product with incompatible plan copy and no Growth product. SaleAura V1 requires exact monthly USD 19 Starter and USD 49 Growth products. `POLAR_PRODUCT_IDS` is empty.
+
+Required action: CEO explicitly authorizes creation/correction of the two sandbox products and local product-ID configuration, or performs the Polar dashboard work and provides the exact IDs. Then run an authorized sandbox checkout, subscription lifecycle, `order.paid`, and customer-portal verification.
+
+Owner: CEO
+
+Date: 2026-07-02 (Asia/Karachi)
+
+Resolution reference: Pending.
 
 ## Database / Migration Ledger
 
@@ -1356,6 +1372,29 @@ Evidence:
 Reason:
 
 Route bounded repair 1 through complete affected F02 regression validation.
+
+### T-058
+
+Date: 2026-07-02 14:37 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `QA_RUNNING`
+
+To: `EXTERNAL_AUTH_REQUIRED`
+
+Evidence:
+
+* F02 QA report Attempt 3 ending `STATUS: FAIL`.
+* Product checkpoint `e8795d0`.
+* Findings `F02-QA-002` through `F02-QA-011` verified.
+* `F02-QA-001` marked `BLOCKED`.
+* 31 F02 TypeScript tests, six F02 Python tests, local migration/ACL/quota checks, typecheck, targeted lint, and build pass.
+* Read-only Polar sandbox listing proves approved Starter/Growth products are absent.
+
+Reason:
+
+Stop before external billing-system mutation. F02 cannot pass complete checkout QA or reach the M1 milestone gate until the CEO authorizes or completes exact Polar sandbox product configuration.
 
 ## Status
 

@@ -257,6 +257,102 @@ New finding:
 
 Attempt Result: FAIL
 
+## Attempt 3
+
+### Environment
+
+* QA mode: `BOUNDED_REPAIR_REGRESSION`
+* Product checkpoint: `e8795d0`
+* Node.js `22.13.1`, pnpm `10.11.1`
+* PostgreSQL `16.14`, repeated fresh disposable F02 databases
+* Polar sandbox: read-only product listing; no mutation/checkout/payment
+* Shared staging/production: not contacted
+
+### QA Summary
+
+FAIL — external authorization required.
+
+All implemented F02 application and local database behavior passes, including bounded repair 1. No open code defect remains. QA cannot pass the complete feature because the configured Polar sandbox does not contain the approved recurring products:
+
+* Existing “Standard”: USD 20/month with incompatible quota description.
+* No USD 19 Starter product.
+* No USD 49 Growth product.
+* `POLAR_PRODUCT_IDS` is empty.
+
+The application correctly refuses checkout in this state, preventing an incorrect charge. Creating/correcting Polar products and configuring IDs is an external billing-system mutation that was not authorized.
+
+### Requirement / Acceptance Matrix
+
+| Requirement ID | Result | Evidence |
+| --- | --- | --- |
+| `PLAN-001` | BLOCKED | Locked application/API/database display catalog passes; exact external Polar paid products do not exist. |
+| `PLAN-002` | PASS | Billing shows current plan, lifecycle/effective mode, usage, locked plans, and owner payment history with unavailable handling. |
+| `BILLING-001` | BLOCKED | Trusted checkout code and product mismatch refusal pass; no exact configured product exists for an actual checkout. |
+| `BILLING-002` | PASS | Signature boundary, retry, duplicate, lifecycle, owner/product mapping, and `order.paid` evidence passes. |
+| `BILLING-003` | PASS | Browser return is pending-only; checkout events cannot grant access. |
+| `ENTITLEMENT-001` | PASS | Canonical active/retained/unavailable resolver passes executable cases. |
+| `ENTITLEMENT-002` | PASS | Retained data and existing-inventory update evidence passes. |
+| `ENTITLEMENT-003` | PASS | Retained/unavailable widget, lead, AI, and new-inventory gates pass. |
+| `ENTITLEMENT-004` | PASS | Active/uncanceled verified state restores eligible activity. |
+| `QUOTA-001` | PASS | AI, transactional lead, and atomic inventory quota evidence passes. |
+| `SEC-PAY-001` | PASS | Payment/event ACL, RLS, unique-order, service-role, and browser-denial evidence passes. |
+
+### Test Cases and Actual Results
+
+* `pnpm exec tsc --noEmit`: PASS.
+* `pnpm exec vitest run`: PASS — 15 files / 63 tests.
+* F02 TypeScript tests: PASS — 31 tests.
+* Python unit discovery: PASS — 15 tests, including six F02 tests.
+* Python syntax: PASS — 18 files.
+* F02-targeted ESLint: PASS — 0 errors, 3 existing image-element warnings.
+* `pnpm run build`: PASS — 33 routes/pages; existing warnings/skipped embedded gates recorded.
+* Workflow dry-run: PASS — 12 checks.
+* Fresh baseline → migration → verification: PASS.
+* Migration repeat application: PASS.
+* Consolidated F02 function parse: PASS.
+* `git diff --check b48d8bc...e8795d0`: PASS.
+* Migration SHA-256 remains `76763892d3478fa557525295ae5fe0217da34b7393b7cd5828d28829d2604fcc`.
+* Read-only Polar sandbox product listing: FAIL against approved catalog.
+
+### Findings
+
+Verified:
+
+* `F02-QA-002` through `F02-QA-011`: `VERIFIED`
+
+Blocked:
+
+#### `F02-QA-001`
+
+* Requirement ID: `PLAN-001`, `BILLING-001`
+* Severity: Critical
+* State: `BLOCKED`
+* Title: Exact Polar sandbox Starter/Growth products are absent
+* Application state: Safe mismatch refusal verified.
+* External state: USD 20 Standard exists; approved USD 19 Starter and USD 49 Growth do not.
+* Required action: CEO explicitly authorizes sandbox product creation/correction and product-ID configuration, or performs those changes and supplies the exact IDs.
+* Owner: CEO.
+
+No open product-code finding remains.
+
+### Security and Ownership Checks
+
+PASS locally.
+
+Incorrect external product configuration cannot charge an owner because checkout validates the live product recurrence/currency/price before creation. Webhook, payment, entitlement, quota, ACL, and owner-isolation evidence passes.
+
+### Scope Compliance
+
+PASS. No external Polar write, real checkout, payment, subscription, shared database, production, legal, or deployment mutation occurred.
+
+### Coverage Limitations
+
+* No actual sandbox checkout/order/subscription/portal round trip can run until exact products exist and IDs are configured.
+* Live Supabase metadata/advisors remain unavailable because connector OAuth authorization is required.
+* Shared staging and production remain untouched.
+
+Attempt Result: FAIL
+
 ## Status
 
 STATUS: FAIL
