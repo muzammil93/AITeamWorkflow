@@ -30,7 +30,7 @@ FAIL.
 
 The repository contains a useful partial subscription foundation: the locked plan constants are correct, checkout is server-created for an authenticated owner, the Polar route verifies webhook signatures through `@polar-sh/nextjs`, cancellation can retain access until period end, and lead/AI paths attempt atomic quota consumption.
 
-The implementation is not F02-ready. The configured Polar sandbox does not match the locked product model, payment history is synthesized from subscription state instead of `order.paid`, event deduplication can permanently discard retries, lifecycle coverage is incomplete, checkout-return UI claims activation without authoritative confirmation, access-mode logic is duplicated/incomplete, widget and inventory creation can bypass entitlement/quota enforcement, payment/function privileges are not explicitly restricted, the consolidated SQL has a syntax error, and no F02 regression tests exist.
+The implementation is not F02-ready. The configured Polar sandbox does not match the locked product model, payment history is synthesized from subscription state instead of `order.paid`, event deduplication can permanently discard retries, lifecycle coverage is incomplete, checkout-return UI claims activation without authoritative confirmation, access-mode logic is duplicated/incomplete, widget and inventory creation can bypass entitlement/quota enforcement, payment/function privileges are not explicitly restricted, subscription SQL lacks a canonical migration history/final-state gate, and no F02 regression tests exist.
 
 The QA-first baseline failure does not consume a repair cycle.
 
@@ -56,7 +56,7 @@ The QA-first baseline failure does not consume a repair cycle.
 * `pnpm exec vitest run`: PASS — existing F01 suite only, 8 files / 32 tests.
 * F02-targeted ESLint: FAIL — 12 errors, primarily explicit `any`, plus one unused catch variable.
 * F02 automated tests discovered: none.
-* Static consolidated-schema parse inspection: FAIL — `reset_monthly_quotas_if_due` contains a duplicate `ELSE` branch.
+* Canonical F02 migration discovery: FAIL — subscription SQL exists as root-level standalone files rather than one ordered file under `supabase/migrations/`.
 * Read-only Polar sandbox product listing:
   * Product `adbd4b92-1362-48fd-ba26-2f173409d9af`: “Standard”, recurring monthly, USD 20, description “Unlimited Inventory Items / 30 leads/month”.
   * Product “Free Forever”: zero-price recurring product with 25 inventory / 3 leads description.
@@ -159,10 +159,10 @@ The QA-first baseline failure does not consume a repair cycle.
 * Requirement ID: `SEC-PAY-001`
 * Severity: High
 * State: `OPEN`
-* Title: Consolidated subscription SQL is not executable
-* Evidence: `supabase-schema.sql` has two consecutive `ELSE leads_reset_date` branches in one `CASE`.
-* Expected: Consolidated schema and canonical additive migrations parse and reproduce the intended state.
-* Actual: The checked-in consolidated schema contains a syntax error; existing subscription SQL files are outside the canonical migration directory and application history is unclear.
+* Title: Subscription SQL lacks a canonical migration history and reproducible F02 final state
+* Evidence: `supabase-migration-subscription-modular.sql`, cleanup/hotfix/drift files, and `supabase-schema.sql`.
+* Expected: One ordered additive F02 migration and reconciled consolidated schema reproduce the intended state.
+* Actual: Existing subscription SQL files are outside the canonical migration directory, overlap each other, and have unclear application history.
 * Suggested fix direction: Create one canonical additive F02 migration, validate it from representative baseline fixtures, and reconcile the consolidated schema.
 
 #### `F02-QA-010`
