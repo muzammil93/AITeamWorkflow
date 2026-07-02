@@ -30,7 +30,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
 | F01 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | LOCAL_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
-| F02 | QA_FIRST | BASELINE_QA_FAIL | EXISTING_UNVERIFIED | PLANNED | 0/2 | FAIL | — | — | F02-QA-001 through F02-QA-010 |
+| F02 | QA_FIRST | DEVELOPER_RUNNING | FEATURE_BRANCH | PLANNED | 0/2 | FAIL | — | — | Polar sandbox catalog requires separate correction before live checkout |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
 | F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
 | F05 | STANDARD | BLOCKED_DEPENDENCY | NOT_STARTED | PLANNED | 0/2 | — | — | — | F03, F04 |
@@ -1127,6 +1127,107 @@ Evidence:
 Reason:
 
 Existing code does not satisfy approved F02 plan integrity, trusted checkout, reliable billing lifecycle, effective access, atomic quota, payment-security, and test-evidence requirements. Route to delta Product Manager without consuming a repair cycle.
+
+### T-047
+
+Date: 2026-07-02 13:53 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `BASELINE_QA_FAIL`
+
+To: `PRODUCT_MANAGER_RUNNING`
+
+Evidence:
+
+* F02 baseline QA findings `F02-QA-001` through `F02-QA-010`.
+* Master F02 requirements and locked plan values.
+* Polar subscription lifecycle and idempotency guidance.
+
+Reason:
+
+Define the smallest complete F02 delta without authorizing external Polar or shared-environment mutation.
+
+### T-048
+
+Date: 2026-07-02 13:53 (Asia/Karachi)
+
+Actor: Product Manager / Orchestrator
+
+From: `PRODUCT_MANAGER_RUNNING`
+
+To: `PRD_READY`
+
+Evidence:
+
+* `projects/saleaura/features/f02-plans-billing-and-entitlements/prd.md`.
+* PRD terminal line is `STATUS: PRD_READY`.
+* All ten baseline findings are mapped to approved requirements and acceptance criteria.
+
+Reason:
+
+Accept the F02 delta scope, including fail-closed behavior until exact Polar products are separately configured.
+
+### T-049
+
+Date: 2026-07-02 13:53 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `PRD_READY`
+
+To: `ARCHITECT_RUNNING`
+
+Evidence:
+
+* F02 PRD ending `STATUS: PRD_READY`.
+* Baseline QA report.
+* Master SaleAura V1 architecture.
+
+Reason:
+
+Route the approved F02 billing, entitlement, quota, and ACL delta to technical design.
+
+### T-050
+
+Date: 2026-07-02 13:53 (Asia/Karachi)
+
+Actor: Architect / Orchestrator
+
+From: `ARCHITECT_RUNNING`
+
+To: `ARCHITECTURE_READY`
+
+Evidence:
+
+* `projects/saleaura/features/f02-plans-billing-and-entitlements/architecture.md`.
+* Architecture terminal line is `STATUS: ARCHITECTURE_READY`.
+* Design is limited to F02 plan authority, Polar boundaries, access modes, quotas, payment security, migration, and tests.
+
+Reason:
+
+Accept the implementation-ready F02 delta architecture.
+
+### T-051
+
+Date: 2026-07-02 13:53 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `ARCHITECTURE_READY`
+
+To: `DEVELOPER_RUNNING`
+
+Evidence:
+
+* F02 delta PRD ending `STATUS: PRD_READY`.
+* F02 delta architecture ending `STATUS: ARCHITECTURE_READY`.
+* Baseline findings `F02-QA-001` through `F02-QA-010`.
+* Repair count remains `0/2`.
+
+Reason:
+
+Authorize the F02 application, additive local-only migration, and regression-test implementation without external Polar writes.
 
 ## Status
 
