@@ -30,7 +30,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
 | F01 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | LOCAL_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
-| F02 | QA_FIRST | CEO_REQUEST_CREATED | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | — |
+| F02 | QA_FIRST | BASELINE_QA_FAIL | EXISTING_UNVERIFIED | PLANNED | 0/2 | FAIL | — | — | F02-QA-001 through F02-QA-010 |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
 | F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
 | F05 | STANDARD | BLOCKED_DEPENDENCY | NOT_STARTED | PLANNED | 0/2 | — | — | — | F03, F04 |
@@ -1083,6 +1083,50 @@ Evidence:
 Reason:
 
 Activate the next eligible feature, lock the release train to F02, and authorize existing-code verification without production-system mutation.
+
+### T-045
+
+Date: 2026-07-02 13:45 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `CEO_REQUEST_CREATED`
+
+To: `EXISTING_QA_RUNNING`
+
+Evidence:
+
+* F02 CEO request ending `STATUS: CEO_REQUEST_CREATED`.
+* Master PRD ending `STATUS: PRD_READY`.
+* Master architecture ending `STATUS: ARCHITECTURE_READY`.
+* F02 requirement ownership `PLAN-001` through `SEC-PAY-001`.
+
+Reason:
+
+Route the existing plan, Polar, entitlement, quota, and payment-security implementation to baseline QA before Developer involvement.
+
+### T-046
+
+Date: 2026-07-02 13:50 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `EXISTING_QA_RUNNING`
+
+To: `BASELINE_QA_FAIL`
+
+Evidence:
+
+* `projects/saleaura/features/f02-plans-billing-and-entitlements/qa-report.md`.
+* QA report terminal line is `STATUS: FAIL`.
+* Findings `F02-QA-001` through `F02-QA-010`.
+* TypeScript and existing 32 tests pass; F02-targeted lint reports 12 errors.
+* Read-only Polar sandbox catalog conflicts with locked SaleAura plans and has no Growth product.
+* Live Supabase metadata recheck is blocked by connector OAuth authorization.
+
+Reason:
+
+Existing code does not satisfy approved F02 plan integrity, trusted checkout, reliable billing lifecycle, effective access, atomic quota, payment-security, and test-evidence requirements. Route to delta Product Manager without consuming a repair cycle.
 
 ## Status
 
