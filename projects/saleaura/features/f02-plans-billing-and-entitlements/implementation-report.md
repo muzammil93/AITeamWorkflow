@@ -248,6 +248,39 @@ No Polar product/customer/order/subscription mutation was performed.
 
 Attempt Result: IMPLEMENTED
 
+## Attempt 2
+
+### Repair Count
+
+`1/2`
+
+### Finding
+
+`F02-QA-011` — active paid owners could start checkout for another paid tier and create a second recurring subscription.
+
+### Repair
+
+Product checkpoint `e8795d0`:
+
+* Added one pure `hasActivePaidSubscription` predicate.
+* Checkout now rejects any owner with confirmed active paid access, regardless of target paid tier.
+* Billing hides alternate paid checkout controls while active paid access exists.
+* Existing customer-portal management remains the supported active-subscription path.
+* Added regression assertions for active Starter/Growth, active Free trial, and retained paid state.
+
+### Focused Verification
+
+* TypeScript: PASS.
+* Seven focused checkout/error tests: PASS.
+* Focused ESLint: PASS with zero errors/warnings.
+* Diff check: PASS.
+
+### Finding Resolution
+
+* `F02-QA-011`: `FIXED_PENDING_VERIFICATION`
+
+Attempt Result: IMPLEMENTED
+
 ## Status
 
 STATUS: IMPLEMENTATION_COMPLETE

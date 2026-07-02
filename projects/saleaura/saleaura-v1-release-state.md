@@ -30,7 +30,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
 | F01 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | LOCAL_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
-| F02 | QA_FIRST | IMPLEMENTATION_COMPLETE | FEATURE_BRANCH | LOCAL_VALIDATED | 0/2 | FAIL | — | — | Polar sandbox catalog requires separate correction before live checkout |
+| F02 | QA_FIRST | QA_RUNNING | FEATURE_BRANCH | LOCAL_VALIDATED | 1/2 | FAIL | — | — | Polar sandbox catalog requires separate correction before live checkout |
 | F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
 | F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
 | F05 | STANDARD | BLOCKED_DEPENDENCY | NOT_STARTED | PLANNED | 0/2 | — | — | — | F03, F04 |
@@ -1253,6 +1253,109 @@ Evidence:
 Reason:
 
 Complete the approved local F02 delta and mark nine findings fixed pending independent QA. `F02-QA-001` is application-fixed but remains externally blocked by the unchanged Polar sandbox catalog.
+
+### T-053
+
+Date: 2026-07-02 14:33 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `IMPLEMENTATION_COMPLETE`
+
+To: `QA_RUNNING`
+
+Evidence:
+
+* F02 implementation report ending `STATUS: IMPLEMENTATION_COMPLETE`.
+* Product checkpoint `9e0dac6`.
+* Database state `LOCAL_VALIDATED`.
+* Repair count remains `0/2`.
+
+Reason:
+
+Route the completed local F02 delta through post-implementation QA and all baseline finding regressions.
+
+### T-054
+
+Date: 2026-07-02 14:34 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `QA_RUNNING`
+
+To: `QA_FAIL`
+
+Evidence:
+
+* F02 QA report Attempt 2.
+* Product checkpoint `9e0dac6`.
+* Baseline application findings verified or externally blocked.
+* New finding `F02-QA-011`: active paid owners can start a second paid-tier checkout.
+
+Reason:
+
+Route the duplicate paid-subscription risk to bounded repair 1 and increment repair count to `1/2`.
+
+### T-055
+
+Date: 2026-07-02 14:34 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `QA_FAIL`
+
+To: `DEVELOPER_RUNNING`
+
+Evidence:
+
+* Open finding `F02-QA-011`.
+* Repair count `1/2`.
+* Required change is limited to active-paid checkout eligibility, UI control, and regression evidence.
+
+Reason:
+
+Authorize bounded repair 1 for the duplicate active paid checkout path.
+
+### T-056
+
+Date: 2026-07-02 14:35 (Asia/Karachi)
+
+Actor: Developer / Orchestrator
+
+From: `DEVELOPER_RUNNING`
+
+To: `IMPLEMENTATION_COMPLETE`
+
+Evidence:
+
+* Product repair checkpoint `e8795d0`.
+* F02 implementation report Attempt 2.
+* `F02-QA-011` marked `FIXED_PENDING_VERIFICATION`.
+* Focused type, test, lint, and diff checks pass.
+
+Reason:
+
+Complete bounded repair 1 by requiring active paid owners to manage the existing subscription through the customer portal.
+
+### T-057
+
+Date: 2026-07-02 14:35 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `IMPLEMENTATION_COMPLETE`
+
+To: `QA_RUNNING`
+
+Evidence:
+
+* F02 implementation report Attempt 2 ending `STATUS: IMPLEMENTATION_COMPLETE`.
+* Product head `e8795d0`.
+* Repair count `1/2`.
+
+Reason:
+
+Route bounded repair 1 through complete affected F02 regression validation.
 
 ## Status
 

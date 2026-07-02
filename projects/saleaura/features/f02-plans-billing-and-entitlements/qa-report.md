@@ -196,6 +196,67 @@ The existing code does not introduce annual billing, coupons, taxes, team billin
 
 Attempt Result: FAIL
 
+## Attempt 2
+
+### Environment
+
+* QA mode: `POST_IMPLEMENTATION`
+* Product checkpoint: `9e0dac6`
+* Database state: independently reproducible local migration evidence available
+* Polar sandbox: read-only catalog remains unchanged
+
+### QA Summary
+
+FAIL.
+
+The implementation closes the baseline application/database findings or fails safely around the external Polar catalog. One additional billing-integrity defect remains at checkpoint `9e0dac6`: an owner with any active paid subscription is blocked only from checking out the same tier. They can create checkout for the other paid tier, risking two simultaneous recurring subscriptions instead of managing the existing subscription through the customer portal.
+
+This post-implementation code failure consumes repair cycle `1/2`.
+
+The unchanged Polar catalog remains a separate external blocker and does not consume a repair cycle.
+
+### Requirement / Acceptance Matrix
+
+| Requirement ID | Result | Evidence |
+| --- | --- | --- |
+| `PLAN-001` | BLOCKED_EXTERNAL | Locked application catalog and exact Polar product validation pass; sandbox still lacks exact Starter/Growth products. |
+| `PLAN-002` | PASS | Billing overview shows locked plans, lifecycle/effective mode, quotas, and verified payment history. |
+| `BILLING-001` | FAIL | New checkout contract is trusted, but an already-active paid owner can start another tier checkout. |
+| `BILLING-002` | PASS | Required lifecycle, retry, duplicate, owner/product mapping, and `order.paid` tests pass. |
+| `BILLING-003` | PASS | Browser return is pending-only and checkout events do not grant access. |
+| `ENTITLEMENT-001` | PASS | Canonical active/retained/unavailable database resolver passes executable tests. |
+| `ENTITLEMENT-002` | PASS | Retained existing data and inventory update evidence passes. |
+| `ENTITLEMENT-003` | PASS | Widget/new lead/AI/inventory gates pass locally. |
+| `ENTITLEMENT-004` | PASS | Active/uncanceled lifecycle restores eligibility through verified state. |
+| `QUOTA-001` | PASS | Transactional lead/inventory and locked AI quota evidence passes. |
+| `SEC-PAY-001` | PASS | Local ACL/RLS/function execution and unique payment evidence passes. |
+
+### Finding Verification
+
+Baseline findings:
+
+* `F02-QA-001`: `APPLICATION_VERIFIED_EXTERNAL_BLOCKED`
+* `F02-QA-002` through `F02-QA-010`: `VERIFIED`
+
+New finding:
+
+#### `F02-QA-011`
+
+* Requirement ID: `BILLING-001`
+* Severity: Critical
+* State: `OPEN`
+* Title: Active paid owner can start a second paid subscription checkout
+* Reproduction:
+  1. Resolve an owner as active Starter.
+  2. Request Growth checkout.
+  3. Observe the same-plan-only guard permits checkout creation.
+* Expected: Any active paid subscription uses customer portal management; no second recurring checkout is created.
+* Actual: Only active same-tier checkout is blocked.
+* Evidence: `createSubscriptionCheckout` at product checkpoint `9e0dac6`.
+* Suggested fix direction: Centralize an active-paid predicate, block checkout for either paid tier, hide alternate-tier checkout controls, and add regression coverage.
+
+Attempt Result: FAIL
+
 ## Status
 
 STATUS: FAIL
