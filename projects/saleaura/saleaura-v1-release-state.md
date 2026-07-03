@@ -8,17 +8,17 @@ Release-plan version: `1.0`
 
 State owner: Orchestrator
 
-Last reconciliation: 2026-07-03 16:01 (Asia/Karachi) — F02 integrated, exact Polar sandbox products verified, and M1 milestone gate prepared
+Last reconciliation: 2026-07-03 16:18 (Asia/Karachi) — M1 approved by CEO and F03 unlocked
 
-Overall state: `READY_FOR_CEO_REVIEW`
+Overall state: `READY_FOR_NEXT_FEATURE`
 
 Current milestone: `M1 — Platform Foundation`
 
-Current feature: None while M1 CEO review is pending
+Current feature: None
 
-Feature lock: Locked to `M1 CEO milestone review`
+Feature lock: Released
 
-Next eligible feature: `F03 — Catalog Source Ingestion` after M1 CEO approval
+Next eligible feature: `F03 — Catalog Source Ingestion`
 
 ## State Dimensions
 
@@ -31,7 +31,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
 | F01 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | LOCAL_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
 | F02 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | LOCAL_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
-| F03 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02 |
+| F03 | QA_FIRST | READY_TO_START | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | — |
 | F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
 | F05 | STANDARD | BLOCKED_DEPENDENCY | NOT_STARTED | PLANNED | 0/2 | — | — | — | F03, F04 |
 | F06 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02, F03, F04, F05 |
@@ -49,7 +49,7 @@ Workflow, code, database, and production states are tracked separately. No state
 
 | Milestone | State | Features | CEO Decision |
 | --- | --- | --- | --- |
-| M1 Platform Foundation | READY_FOR_CEO_REVIEW | F00–F02 | Pending |
+| M1 Platform Foundation | APPROVED | F00–F02 | Approved 2026-07-03 |
 | M2 Catalog and Inventory | NOT_STARTED | F03–F07 | Pending |
 | M3 Customer Intelligence | NOT_STARTED | F08–F12 | Pending |
 | M4 Owner and Launch Readiness | NOT_STARTED | F13–F15 | Pending |
@@ -1504,6 +1504,27 @@ Evidence:
 Reason:
 
 Hold the release train at the M1 milestone review boundary after completing F02 integration.
+
+### T-064
+
+Date: 2026-07-03 16:18 (Asia/Karachi)
+
+Actor: CEO / Orchestrator
+
+From: `READY_FOR_CEO_REVIEW`
+
+To: `READY_FOR_NEXT_FEATURE`
+
+Evidence:
+
+* CEO approval in the active Codex thread: `I approve M1`
+* Milestone M1 ledger state updated to `APPROVED`
+* F00, F01, and F02 remain integrated with final reports ready
+* Release Plan v1.0 dependency from F03 to F02 is satisfied
+
+Reason:
+
+Approve M1 Platform Foundation and unlock F03 as the next eligible feature in the release plan.
 
 ## Status
 
