@@ -8,11 +8,11 @@ Release-plan version: `1.0`
 
 State owner: Orchestrator
 
-Last reconciliation: 2026-07-03 16:29 (Asia/Karachi) — F03 baseline QA failed and routed to delta definition
+Last reconciliation: 2026-07-03 17:33 (Asia/Karachi) — F03 PRD and architecture completed for implementation handoff
 
-Overall state: `BASELINE_QA_FAIL`
+Overall state: `ARCHITECTURE_READY`
 
-Current milestone: `M1 — Platform Foundation`
+Current milestone: `M2 — Catalog and Inventory`
 
 Current feature: `F03 — Catalog Source Ingestion`
 
@@ -31,7 +31,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
 | F01 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | LOCAL_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
 | F02 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | LOCAL_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
-| F03 | QA_FIRST | BASELINE_QA_FAIL | FEATURE_BRANCH | PLANNED | 0/2 | FAIL | — | — | — |
+| F03 | QA_FIRST | ARCHITECTURE_READY | FEATURE_BRANCH | PLANNED | 0/2 | FAIL | — | — | — |
 | F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
 | F05 | STANDARD | BLOCKED_DEPENDENCY | NOT_STARTED | PLANNED | 0/2 | — | — | — | F03, F04 |
 | F06 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02, F03, F04, F05 |
@@ -50,7 +50,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | Milestone | State | Features | CEO Decision |
 | --- | --- | --- | --- |
 | M1 Platform Foundation | APPROVED | F00–F02 | Approved 2026-07-03 |
-| M2 Catalog and Inventory | NOT_STARTED | F03–F07 | Pending |
+| M2 Catalog and Inventory | IN_PROGRESS | F03–F07 | Pending |
 | M3 Customer Intelligence | NOT_STARTED | F08–F12 | Pending |
 | M4 Owner and Launch Readiness | NOT_STARTED | F13–F15 | Pending |
 
@@ -1590,6 +1590,86 @@ Evidence:
 Reason:
 
 Existing code does not satisfy approved F03 product identity, source tracking, lifecycle state, read-only inventory behavior, customer-safe DTO, or inventory-security requirements. Route to delta Product Manager without consuming a repair cycle.
+
+### T-068
+
+Date: 2026-07-03 17:33 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `BASELINE_QA_FAIL`
+
+To: `PRODUCT_MANAGER_RUNNING`
+
+Evidence:
+
+* F03 baseline QA findings `F03-QA-001` through `F03-QA-006`
+* Master F03 requirements `INV-001` through `SEC-INV-001`
+* Master inventory identity/source, DTO, and security architecture constraints
+
+Reason:
+
+Define the smallest complete F03 delta without expanding into F04–F07 behavior or shared-environment mutation.
+
+### T-069
+
+Date: 2026-07-03 17:33 (Asia/Karachi)
+
+Actor: Product Manager / Orchestrator
+
+From: `PRODUCT_MANAGER_RUNNING`
+
+To: `PRD_READY`
+
+Evidence:
+
+* `projects/saleaura/features/f03-product-catalog-and-manual-inventory/prd.md`
+* PRD terminal line is `STATUS: PRD_READY`
+* All six baseline findings are mapped to approved requirements and acceptance criteria
+
+Reason:
+
+Accept the F03 delta scope for product identity, source tracking, lifecycle state, editable/read-only behavior, customer DTOs, and inventory security.
+
+### T-070
+
+Date: 2026-07-03 17:33 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `PRD_READY`
+
+To: `ARCHITECT_RUNNING`
+
+Evidence:
+
+* F03 PRD ending `STATUS: PRD_READY`
+* F03 baseline QA report
+* Master SaleAura V1 architecture
+
+Reason:
+
+Route the approved F03 catalog, source, DTO, and inventory-security delta to technical design.
+
+### T-071
+
+Date: 2026-07-03 17:33 (Asia/Karachi)
+
+Actor: Architect / Orchestrator
+
+From: `ARCHITECT_RUNNING`
+
+To: `ARCHITECTURE_READY`
+
+Evidence:
+
+* `projects/saleaura/features/f03-product-catalog-and-manual-inventory/architecture.md`
+* Architecture terminal line is `STATUS: ARCHITECTURE_READY`
+* Design is limited to F03 product identity, source ownership, lifecycle state, image upload gating, customer DTO boundaries, migration, and tests
+
+Reason:
+
+Accept the implementation-ready F03 delta architecture.
 
 ## Status
 
