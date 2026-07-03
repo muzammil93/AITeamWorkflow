@@ -353,6 +353,89 @@ PASS. No external Polar write, real checkout, payment, subscription, shared data
 
 Attempt Result: FAIL
 
+## Attempt 4
+
+### Environment
+
+* QA mode: `AUTHORIZED_EXTERNAL_CONFIGURATION`
+* Product checkpoint: `e8795d0`
+* Node.js `22.13.1`, pnpm `10.11.1`
+* Python `3.13.7`
+* Polar sandbox: authorized mutation performed on 2026-07-03
+* Shared staging/production: not contacted
+
+### QA Summary
+
+PASS.
+
+The only remaining F02 blocker in Attempt 3 was the absence of exact approved Polar sandbox products. That blocker is now resolved. On 2026-07-03 (Asia/Karachi), two new recurring monthly sandbox products were created and verified against the locked SaleAura contract:
+
+* Starter — `b10d435d-be15-4372-9591-75ad6143f8d4` — USD 19/month recurring
+* Growth — `22264688-010a-4f4f-802f-b3599fe49744` — USD 49/month recurring
+
+`POLAR_PRODUCT_IDS` is now configured locally to those exact recurring product IDs. The application still rejects mismatched/archived/non-monthly products, and all F02 local code, test, build, and database evidence remains green.
+
+One accidental one-time Starter sandbox product was created during the first authorized POST attempt while discovering the required recurring payload shape:
+
+* Accidental Starter — `356d2eb9-9b52-4478-baba-92dfe4551665` — one-time USD 19
+
+It is not referenced by `POLAR_PRODUCT_IDS`, is rejected by the F02 checkout contract, and does not affect SaleAura runtime behavior.
+
+### Requirement / Acceptance Matrix
+
+| Requirement ID | Result | Evidence |
+| --- | --- | --- |
+| `PLAN-001` | PASS | Locked app catalog matches the verified recurring Polar Starter/Growth products and exact local mapping. |
+| `PLAN-002` | PASS | Billing shows locked plans, lifecycle/effective mode, quotas, and verified payment history. |
+| `BILLING-001` | PASS | Authenticated checkout uses exact mapped recurring products, stable identity/metadata, safe URLs, and rejects invalid catalog drift. |
+| `BILLING-002` | PASS | Signature boundary, retry, duplicate, lifecycle, owner/product mapping, and `order.paid` evidence passes. |
+| `BILLING-003` | PASS | Browser return is pending-only; checkout events cannot grant access. |
+| `ENTITLEMENT-001` | PASS | Canonical active/retained/unavailable resolver passes executable cases. |
+| `ENTITLEMENT-002` | PASS | Retained data and existing-inventory update evidence passes. |
+| `ENTITLEMENT-003` | PASS | Retained/unavailable widget, lead, AI, and new-inventory gates pass. |
+| `ENTITLEMENT-004` | PASS | Active/uncanceled verified state restores eligible activity. |
+| `QUOTA-001` | PASS | AI, transactional lead, and atomic inventory quota evidence passes. |
+| `SEC-PAY-001` | PASS | Payment/event ACL, RLS, unique-order, service-role, and browser-denial evidence passes. |
+
+### Test Cases and Actual Results
+
+* Verified Polar sandbox recurring catalog on 2026-07-03:
+  * Starter `b10d435d-be15-4372-9591-75ad6143f8d4`: recurring monthly, USD 19.
+  * Growth `22264688-010a-4f4f-802f-b3599fe49744`: recurring monthly, USD 49.
+* Local `.env` now sets `POLAR_PRODUCT_IDS={"starter":"b10d435d-be15-4372-9591-75ad6143f8d4","growth":"22264688-010a-4f4f-802f-b3599fe49744"}`.
+* `pnpm exec vitest run tests/f02 tests/f01`: PASS — 15 files / 63 tests.
+* `python3 -m unittest discover -s tests -p 'test_*.py'`: PASS — 15 tests.
+* `pnpm run build`: PASS — 33 routes/pages; existing `punycode` deprecation warnings remain.
+* `pnpm exec tsc --noEmit`: PASS after refreshing generated `.next` route types via a fresh build.
+
+### Findings
+
+Verified:
+
+* `F02-QA-001` through `F02-QA-011`: `VERIFIED`
+
+No open F02 finding remains.
+
+### Security and Ownership Checks
+
+PASS.
+
+The approved sandbox catalog now matches the locked SaleAura monthly contract, while checkout still enforces exact recurrence/currency/price checks before any subscription session can be created. Local ACL, RLS, entitlement, quota, and webhook evidence remains unchanged and passing.
+
+### Scope Compliance
+
+PASS.
+
+The only external mutation performed was isolated Polar sandbox product creation for the approved Starter/Growth contract. No shared database, staging, production, deployment, or real charge mutation occurred.
+
+### Coverage Limitations
+
+* No real sandbox payment, `order.paid`, subscription lifecycle delivery, or portal session round trip was executed against a live customer.
+* Those runtime paths remain covered by deterministic contract, webhook, entitlement, and payment-history regression tests plus exact product verification.
+* Live Supabase metadata/advisors remain unavailable because connector OAuth authorization is required.
+
+Attempt Result: PASS
+
 ## Status
 
-STATUS: FAIL
+STATUS: PASS
