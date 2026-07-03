@@ -8,17 +8,17 @@ Release-plan version: `1.0`
 
 State owner: Orchestrator
 
-Last reconciliation: 2026-07-03 16:18 (Asia/Karachi) — M1 approved by CEO and F03 unlocked
+Last reconciliation: 2026-07-03 16:29 (Asia/Karachi) — F03 baseline QA failed and routed to delta definition
 
-Overall state: `READY_FOR_NEXT_FEATURE`
+Overall state: `BASELINE_QA_FAIL`
 
 Current milestone: `M1 — Platform Foundation`
 
-Current feature: None
+Current feature: `F03 — Catalog Source Ingestion`
 
-Feature lock: Released
+Feature lock: Locked to `F03`
 
-Next eligible feature: `F03 — Catalog Source Ingestion`
+Next eligible feature: None while F03 is active
 
 ## State Dimensions
 
@@ -31,7 +31,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
 | F01 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | LOCAL_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
 | F02 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | LOCAL_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
-| F03 | QA_FIRST | READY_TO_START | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | — |
+| F03 | QA_FIRST | BASELINE_QA_FAIL | FEATURE_BRANCH | PLANNED | 0/2 | FAIL | — | — | — |
 | F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
 | F05 | STANDARD | BLOCKED_DEPENDENCY | NOT_STARTED | PLANNED | 0/2 | — | — | — | F03, F04 |
 | F06 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02, F03, F04, F05 |
@@ -1525,6 +1525,71 @@ Evidence:
 Reason:
 
 Approve M1 Platform Foundation and unlock F03 as the next eligible feature in the release plan.
+
+### T-065
+
+Date: 2026-07-03 16:18 (Asia/Karachi)
+
+Actor: CEO / Orchestrator
+
+From: `READY_FOR_NEXT_FEATURE`
+
+To: `CEO_REQUEST_CREATED`
+
+Evidence:
+
+* CEO instruction in the active Codex thread: `Start F03`
+* `projects/saleaura/features/f03-product-catalog-and-manual-inventory/ceo-request.md`
+* Release Plan v1.0 assigns F03 `QA_FIRST` entry with F02 as its only dependency
+* F02 is integrated at product commit `f8e48fb`
+* Clean product repository at release-branch head before creating feature branch `feature/f03-product-catalog-manual-inventory`
+* Clean AI Team repository at `4b933e4`
+
+Reason:
+
+Activate the next eligible feature, lock the release train to F03, and authorize existing-code verification without production-system mutation.
+
+### T-066
+
+Date: 2026-07-03 16:18 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `CEO_REQUEST_CREATED`
+
+To: `EXISTING_QA_RUNNING`
+
+Evidence:
+
+* F03 CEO request ending `STATUS: CEO_REQUEST_CREATED`
+* Release Plan v1.0 F03 requirements `INV-001` through `SEC-INV-001`
+* Existing inventory UI, API, backend import, and schema boundaries are under inspection
+
+Reason:
+
+Route the existing product-catalog, inventory-identity, source-tracking, customer-DTO, and inventory-security implementation to baseline QA before Developer involvement.
+
+### T-067
+
+Date: 2026-07-03 16:29 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `EXISTING_QA_RUNNING`
+
+To: `BASELINE_QA_FAIL`
+
+Evidence:
+
+* `projects/saleaura/features/f03-product-catalog-and-manual-inventory/qa-report.md`
+* QA report terminal line is `STATUS: FAIL`
+* Findings `F03-QA-001` through `F03-QA-006`
+* Existing suites still pass: 15 Vitest files / 63 tests, 15 Python tests, TypeScript compiler
+* Inventory identity is still name/category/brand based, per-row source metadata is absent, and raw inventory remains publicly readable in checked-in schema
+
+Reason:
+
+Existing code does not satisfy approved F03 product identity, source tracking, lifecycle state, read-only inventory behavior, customer-safe DTO, or inventory-security requirements. Route to delta Product Manager without consuming a repair cycle.
 
 ## Status
 
