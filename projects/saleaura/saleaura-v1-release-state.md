@@ -8,17 +8,17 @@ Release-plan version: `1.0`
 
 State owner: Orchestrator
 
-Last reconciliation: 2026-07-03 17:33 (Asia/Karachi) — F03 PRD and architecture completed for implementation handoff
+Last reconciliation: 2026-07-16 18:16 (Asia/Karachi) — existing-code verification reconciled F03–F06 with current code, tests, staging E2E evidence, and final reports
 
 Overall state: `ARCHITECTURE_READY`
 
 Current milestone: `M2 — Catalog and Inventory`
 
-Current feature: `F03 — Catalog Source Ingestion`
+Current feature: `F07 — Google Sheets Connection and Manual Sync`
 
-Feature lock: Locked to `F03`
+Feature lock: Locked to `F07`
 
-Next eligible feature: None while F03 is active
+Next eligible feature: F07, subject to its QA-first baseline verification
 
 ## State Dimensions
 
@@ -31,11 +31,11 @@ Workflow, code, database, and production states are tracked separately. No state
 | F00 | STANDARD | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
 | F01 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | LOCAL_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
 | F02 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | LOCAL_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
-| F03 | QA_FIRST | ARCHITECTURE_READY | FEATURE_BRANCH | PLANNED | 0/2 | FAIL | — | — | — |
-| F04 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F03 |
-| F05 | STANDARD | BLOCKED_DEPENDENCY | NOT_STARTED | PLANNED | 0/2 | — | — | — | F03, F04 |
-| F06 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02, F03, F04, F05 |
-| F07 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F06 |
+| F03 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | STAGING_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
+| F04 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | STAGING_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
+| F05 | STANDARD | FINAL_REPORT_READY | INTEGRATED | STAGING_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
+| F06 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | STAGING_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
+| F07 | QA_FIRST | ARCHITECTURE_READY | EXISTING_UNVERIFIED | PLANNED | 0/2 | FAIL | — | — | — |
 | F08 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01, F02, F03 |
 | F09 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F04, F05, F07, F08 |
 | F10 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F09 |
@@ -64,9 +64,9 @@ Branch: `1.0.0/1.0.0_BackednImplementation_v3`
 
 Pre-F00 baseline commit: `ff5a7ee`
 
-Integrated head: `f8e48fb`
+Integrated head: `4285cb3`
 
-State: Clean, F00 and F01 integrated, local branch ahead of remote by six commits
+State: Clean; F00–F06 and inventory QA automation integrated locally.
 
 Required action: Remote push is not required for local F02 continuation and has not been performed.
 
@@ -99,6 +99,8 @@ Required action: None for local F02 continuation. Remote push has not been perfo
 * Workflow dry-run checks: 12/12 pass.
 * Local-only Supabase lint: command established; current result unavailable because the disposable local stack is not running.
 * F01 product-behavior tests: 32/32 pass across eight Vitest files.
+* F03–F06 verification, 2026-07-16: 93/93 Vitest tests, 19/19 Python `unittest` tests, and TypeScript typecheck pass.
+* Inventory staging E2E record, 2026-07-16: 12/12 scenarios pass.
 * F00 safety-harness tests: established and passing.
 * F01 database migration: `LOCAL_VALIDATED`; shared staging and production remain `NOT_APPLIED`.
 * Supabase connection: previously authenticated; OAuth may require reauthentication.
@@ -169,7 +171,7 @@ Resolution reference: On 2026-07-03 (Asia/Karachi), authorized sandbox configura
 
 F01 migration `20260702023000_f01_owner_identity_onboarding.sql` is created and `LOCAL_VALIDATED`.
 
-Shared staging state: `STAGING_NOT_APPLIED`
+F03–F06 staging state: `STAGING_VALIDATED`; F06 identity-preservation migration `20260716120000_f06_preserve_inventory_import_identity.sql` applied to staging.
 
 Production state: `PRODUCTION_NOT_APPLIED`
 
@@ -1670,6 +1672,26 @@ Evidence:
 Reason:
 
 Accept the implementation-ready F03 delta architecture.
+
+### T-072
+
+Date: 2026-07-16 18:16 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `STATE_INCONSISTENT`
+
+To: `F07_QA_BASELINE_PENDING`
+
+Evidence:
+
+* Current product head `4285cb3` and clean working tree.
+* F03–F06 PRDs/architectures, passing QA reports, approved review reports, and final reports.
+* 93/93 Vitest tests, 19/19 Python inventory tests, passing TypeScript typecheck, and the recorded 12/12 staging inventory E2E pass.
+
+Reason:
+
+The mutable tracker lagged the implemented F03–F06 work. Existing-code verification reconciles it without changing the approved release plan, and unlocks F07's required QA-first baseline.
 
 ## Status
 

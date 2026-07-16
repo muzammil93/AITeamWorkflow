@@ -175,4 +175,23 @@ Attempt Result: FAIL
 
 ## Status
 
-STATUS: FAIL
+Attempt Result: FAIL
+
+## Verification Attempt — 2026-07-16
+
+Scope: existing-code verification of the persisted eligibility model and deterministic compatibility behavior.
+
+Evidence:
+
+* `pnpm test`: 93/93 pass, including six F04 eligibility tests and three migration-contract tests.
+* `venv/bin/python -m unittest ...`: 19/19 pass, including the F04 Python eligibility suite.
+* `pnpm exec tsc --noEmit`: pass.
+* Inventory E2E coverage includes eligibility search, sorting, and pagination against staging inventory.
+
+Result: The previous baseline findings F04-QA-001 through F04-QA-006 are not reproduced by the current deterministic rule, migration, and UI regression coverage. No new F04 finding was observed.
+
+Attempt Result: PASS
+
+## Status
+
+STATUS: PASS
