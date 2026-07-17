@@ -8,17 +8,17 @@ Release-plan version: `1.0`
 
 State owner: Orchestrator
 
-Last reconciliation: 2026-07-17 (Asia/Karachi) — F08 QA/review/final evidence completed with CEO-confirmed Playwright validation; F09 authorized to proceed with F07 live-validation risk retained
+Last reconciliation: 2026-07-17 (Asia/Karachi) — F10 implementation, QA, review, final evidence, and staging snapshot migration completed; F07 live-validation risk retained
 
-Overall state: `QA_BASELINE_PENDING`
+Overall state: `FINAL_REPORT_READY`
 
 Current milestone: `M3 — Customer Intelligence`
 
-Current feature: `F10 — Verified Build Generation`
+Current feature: `F11 — Build Modification`
 
-Feature lock: Locked to `F10`
+Feature lock: Locked to `F11`
 
-Next eligible feature: F10, per CEO authorization with F07's recorded live-validation risk retained
+Next eligible feature: F11, per CEO authorization with F07's recorded live-validation risk retained
 
 ## State Dimensions
 
@@ -38,8 +38,8 @@ Workflow, code, database, and production states are tracked separately. No state
 | F07 | QA_FIRST | IMPLEMENTED_QA_DEFERRED | INTEGRATED | STAGING_VALIDATED | 0/2 | DEFERRED_CEO_WAIVER | — | — | Live Google Sheets validation deferred; required before F09/production use |
 | F08 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | STAGING_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
 | F09 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
-| F10 | QA_FIRST | QA_BASELINE_PENDING | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F07 live Google Sheets validation deferred by CEO |
-| F11 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F10 |
+| F10 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | STAGING_VALIDATED | 0/2 | PASS | APPROVED | READY | Representative eight-category staging catalog is still needed for live happy-path validation |
+| F11 | QA_FIRST | QA_BASELINE_PENDING | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F07 live Google Sheets validation deferred by CEO |
 | F12 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02, F08, F11 |
 | F13 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02, F03, F08, F12 |
 | F14 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | NOT_REQUIRED | 0/2 | — | — | — | F02, F09, F10, F11, F12, F13 |
