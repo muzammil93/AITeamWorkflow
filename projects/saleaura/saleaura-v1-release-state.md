@@ -8,17 +8,17 @@ Release-plan version: `1.0`
 
 State owner: Orchestrator
 
-Last reconciliation: 2026-07-16 18:16 (Asia/Karachi) — existing-code verification reconciled F03–F06 with current code, tests, staging E2E evidence, and final reports
+Last reconciliation: 2026-07-17 (Asia/Karachi) — CEO deferred live F07 validation; F08 independently unlocked by its F01–F03 dependencies
 
-Overall state: `ARCHITECTURE_READY`
+Overall state: `READY_FOR_NEXT_FEATURE`
 
-Current milestone: `M2 — Catalog and Inventory`
+Current milestone: `M3 — Customer Intelligence`
 
-Current feature: `F07 — Google Sheets Connection and Manual Sync`
+Current feature: `F08 — Widget Platform and Anonymous Session Security`
 
-Feature lock: Locked to `F07`
+Feature lock: Locked to `F08`
 
-Next eligible feature: F07, subject to its QA-first baseline verification
+Next eligible feature: F08, subject to its QA-first baseline verification
 
 ## State Dimensions
 
@@ -35,8 +35,8 @@ Workflow, code, database, and production states are tracked separately. No state
 | F04 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | STAGING_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
 | F05 | STANDARD | FINAL_REPORT_READY | INTEGRATED | STAGING_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
 | F06 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | STAGING_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
-| F07 | QA_FIRST | ARCHITECTURE_READY | EXISTING_UNVERIFIED | PLANNED | 0/2 | FAIL | — | — | — |
-| F08 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F01, F02, F03 |
+| F07 | QA_FIRST | IMPLEMENTED_QA_DEFERRED | INTEGRATED | STAGING_VALIDATED | 0/2 | DEFERRED_CEO_WAIVER | — | — | Live Google Sheets validation deferred; required before F09/production use |
+| F08 | QA_FIRST | QA_BASELINE_PENDING | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | — |
 | F09 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F04, F05, F07, F08 |
 | F10 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F09 |
 | F11 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F10 |

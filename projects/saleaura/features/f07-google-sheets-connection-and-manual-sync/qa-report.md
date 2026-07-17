@@ -19,4 +19,14 @@ The existing code supplies useful parsing and generic source metadata but does n
 
 Attempt Result: FAIL
 
-STATUS: FAIL
+Attempt Result: FAIL
+
+## CEO-Approved Live-Test Deferral — 2026-07-17
+
+The CEO authorized deferring the shareable-Google-Sheet staging validation. Automated verification, the staging schema migration, and code review are complete; live Google read/connect/manual-sync, source-missing archive, and reactivation scenarios remain explicitly unverified.
+
+Risk: external Google credentials, sharing permissions, and real worksheet lifecycle behavior may still expose integration defects. This is not a QA pass and must be completed before F09 or production readiness relies on Google Sheets data.
+
+Attempt Result: DEFERRED_BY_CEO
+
+STATUS: QA_DEFERRED_CEO_WAIVER
