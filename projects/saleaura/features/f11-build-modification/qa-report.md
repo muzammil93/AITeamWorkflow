@@ -11,4 +11,12 @@
 
 Attempt Result: FAIL
 
-STATUS: FAIL
+## Verification Attempt — 2026-07-17
+
+* Targeted F10/F11 Python regressions pass (8 tests): required-component protection, complete validator enforcement, customer-visible candidate filters, private pending proposals, snapshot confirmation contract, and F10 regressions.
+* Python syntax and TypeScript typecheck pass.
+* F11 uses the already-validated F10 staging snapshot table; no schema migration is required.
+
+Attempt Result: PASS
+
+STATUS: PASS
