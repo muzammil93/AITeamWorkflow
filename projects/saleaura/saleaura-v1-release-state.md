@@ -14,11 +14,11 @@ Overall state: `FINAL_REPORT_READY`
 
 Current milestone: `M3 — Customer Intelligence`
 
-Current feature: `F14 — Public Website and Product Positioning`
+Current feature: `F15 — Integrated Production-Readiness Gate`
 
-Feature lock: Locked to `F14`
+Feature lock: Locked to `F15`
 
-Next eligible feature: F14, per CEO authorization with F07's recorded live-validation risk retained
+Next eligible feature: F15, per CEO authorization with F07's recorded live-validation risk retained
 
 ## State Dimensions
 
@@ -42,8 +42,8 @@ Workflow, code, database, and production states are tracked separately. No state
 | F11 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 0/2 | PASS | APPROVED | READY | — |
 | F12 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | STAGING_VALIDATED | 0/2 | PASS | APPROVED | READY | — |
 | F13 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 0/2 | PASS | APPROVED | READY | — |
-| F14 | QA_FIRST | QA_BASELINE_PENDING | EXISTING_UNVERIFIED | NOT_REQUIRED | 0/2 | — | — | — | F07 live Google Sheets validation deferred by CEO |
-| F15 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | NOT_REQUIRED | 0/2 | — | — | — | F00, F01, F02, F03, F04, F05, F06, F07, F08, F09, F10, F11, F12, F13, F14 |
+| F14 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 0/2 | PASS | APPROVED | READY | — |
+| F15 | QA_FIRST | QA_BASELINE_PENDING | EXISTING_UNVERIFIED | NOT_REQUIRED | 0/2 | — | — | — | F07 live Google Sheets validation deferred by CEO |
 
 ## Milestone Ledger
 
