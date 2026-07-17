@@ -14,11 +14,11 @@ Overall state: `QA_BASELINE_PENDING`
 
 Current milestone: `M3 — Customer Intelligence`
 
-Current feature: `F09 — Conversation Core, Search, and Comparison`
+Current feature: `F10 — Verified Build Generation`
 
-Feature lock: Locked to `F09`
+Feature lock: Locked to `F10`
 
-Next eligible feature: F09, per CEO authorization with F07's recorded live-validation risk retained
+Next eligible feature: F10, per CEO authorization with F07's recorded live-validation risk retained
 
 ## State Dimensions
 
@@ -37,8 +37,8 @@ Workflow, code, database, and production states are tracked separately. No state
 | F06 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | STAGING_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
 | F07 | QA_FIRST | IMPLEMENTED_QA_DEFERRED | INTEGRATED | STAGING_VALIDATED | 0/2 | DEFERRED_CEO_WAIVER | — | — | Live Google Sheets validation deferred; required before F09/production use |
 | F08 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | STAGING_VALIDATED | 1/2 | PASS | APPROVED | READY | — |
-| F09 | QA_FIRST | QA_BASELINE_PENDING | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F07 live Google Sheets validation deferred by CEO |
-| F10 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F09 |
+| F09 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 1/2 | PASS | APPROVED | READY | — |
+| F10 | QA_FIRST | QA_BASELINE_PENDING | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F07 live Google Sheets validation deferred by CEO |
 | F11 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F10 |
 | F12 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02, F08, F11 |
 | F13 | QA_FIRST | BLOCKED_DEPENDENCY | EXISTING_UNVERIFIED | PLANNED | 0/2 | — | — | — | F02, F03, F08, F12 |

@@ -10,4 +10,18 @@
 
 Attempt Result: FAIL
 
-STATUS: FAIL
+Attempt Result: FAIL
+
+## Verification Attempt — 2026-07-17
+
+Evidence:
+
+* F09 Python tests pass for quota timing, protected bounded widget history, multilingual contract, and customer-safe response filtering.
+* F09 TypeScript comparison test passes, verifying missing specifications are shown as unavailable rather than fabricated.
+* Existing customer inventory query remains owner-scoped, active-only, and in-stock-only.
+
+Result: The F09 response contract, quota timing, bounded session behavior, and comparison safety requirements are covered by deterministic regression evidence. No open F09 finding remains.
+
+Attempt Result: PASS
+
+STATUS: PASS
