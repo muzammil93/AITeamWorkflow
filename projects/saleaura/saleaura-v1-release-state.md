@@ -8,11 +8,11 @@ Release-plan version: `1.0`
 
 State owner: Orchestrator
 
-Last reconciliation: 2026-07-17 (Asia/Karachi) — F10 implementation, QA, review, final evidence, and staging snapshot migration completed; F07 live-validation risk retained
+Last reconciliation: 2026-07-21 (Asia/Karachi) — documentation-only reconciliation against the E2E tracker through 2026-07-19; F07 live-validation risk retained and the release E2E run remains incomplete
 
-Overall state: `FINAL_REPORT_READY`
+Overall state: `RELEASE_E2E_IN_PROGRESS`
 
-Current milestone: `M3 — Customer Intelligence`
+Current milestone: `M4 — Owner and Launch Readiness`
 
 Current feature: `F15 — Integrated Production-Readiness Gate`
 
@@ -51,8 +51,14 @@ Workflow, code, database, and production states are tracked separately. No state
 | --- | --- | --- | --- |
 | M1 Platform Foundation | APPROVED | F00–F02 | Approved 2026-07-03 |
 | M2 Catalog and Inventory | IN_PROGRESS | F03–F07 | Pending |
-| M3 Customer Intelligence | NOT_STARTED | F08–F12 | Pending |
-| M4 Owner and Launch Readiness | NOT_STARTED | F13–F15 | Pending |
+| M3 Customer Intelligence | IMPLEMENTATION_COMPLETE_E2E_PENDING | F08–F12 | Pending release E2E evidence |
+| M4 Owner and Launch Readiness | IN_PROGRESS | F13–F15 | F13–F14 final reports are ready; F15 and release E2E evidence remain pending |
+
+## Release E2E Reconciliation
+
+The current authoritative execution record is `saleaura-v1-playwright-e2e-tracker.md`, updated 2026-07-19. Its run remains `IN_PROGRESS`: 13 of 33 planned journeys have a complete pass record, 8 are partial or conditional, and 12 are `NOT_RUN`.
+
+The tracker must not receive a final run summary or be closed until every in-scope journey has a final status, required manual notification confirmation is recorded, and no Critical or High finding remains open. The detailed closure sequence is recorded in `saleaura-v1-release-readiness-audit-2026-07-21.md`.
 
 ## Git / Workspace State
 
