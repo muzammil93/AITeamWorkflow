@@ -102,6 +102,14 @@ Before a shared deployment claim, validate a real Google provider round trip wit
 
 Attempt Result: APPROVED
 
+## Review Addendum — Profile Edit Responsiveness
+
+Approved.
+
+The bounded `F01-QA-008` repair is limited to memoizing unchanged localization option lists in the Profile page. It preserves the existing owner profile contract and avoids data, API, authorization, migration, and visual-layout changes. Real-browser Playwright evidence demonstrates a reduction from 428ms to 42ms average input-to-paint latency with no console errors; focused validation, TypeScript, and diff checks pass.
+
+Attempt Result: APPROVED
+
 ## Status
 
 STATUS: APPROVED

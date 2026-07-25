@@ -350,6 +350,30 @@ None.
 
 Attempt Result: IMPLEMENTATION_COMPLETE
 
+## Attempt 3 — Profile Edit Responsiveness
+
+### Repair Count
+
+`2/2`
+
+### Summary
+
+Repaired `F01-QA-008` without changing the profile contract, API, database, or saved data behavior. `app/profile/page.tsx` now memoizes the country, city, and timezone option element lists. Text edits therefore do not rebuild the unchanged localization option trees on every keystroke.
+
+### Verification
+
+* Real authenticated Playwright browser: Full Name input-to-next-paint average improved from 428ms to 42ms; 15/15 characters rendered correctly.
+* Browser console: no error output.
+* `pnpm vitest run tests/f01/profile-validation.test.ts`: 5/5 PASS.
+* `pnpm exec tsc --noEmit`: PASS.
+* `git diff --check`: PASS.
+
+### Scope
+
+Only Profile-page render performance changed. No migration, Supabase mutation, payment, provider, authorization, validation, or product behavior changed.
+
+Attempt Result: IMPLEMENTATION_COMPLETE
+
 ## Status
 
 STATUS: IMPLEMENTATION_COMPLETE

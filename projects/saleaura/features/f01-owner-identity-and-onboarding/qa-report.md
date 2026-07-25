@@ -423,6 +423,20 @@ PASS. Repair 1 is limited to trusted image-host validation, its regression asser
 
 Attempt Result: PASS
 
+## Attempt 4 — Profile Edit Responsiveness
+
+### Finding
+
+`F01-QA-008`: Editing Profile text fields was visibly slow. In the authorized real staging browser, a 15-character Full Name entry required 421–448ms per input-to-next-paint cycle (428ms average). Browser console output contained only the React DevTools informational message and no errors.
+
+### Result
+
+PASS after bounded repair.
+
+The same Playwright procedure, using the same signed-in owner session and restoring the original value without saving, measured 40–43ms per character (42ms average). Product field value propagation succeeded and no browser errors were emitted. Profile validation regression tests and TypeScript checks also pass.
+
+Attempt Result: PASS
+
 ## Status
 
 STATUS: PASS
