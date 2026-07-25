@@ -397,6 +397,10 @@ Category-specific verification must cover at least:
 14. Protected dashboard, profile, inventory, customization, billing, and related APIs must authenticate and scope every operation to the owner.
 15. Public widget APIs must use customer-safe response fields, allowed-domain enforcement, anonymous-session authorization, rate limiting, and subscription availability checks.
 16. Privacy policy, terms and conditions, refund policy, and other legal-document content must remain unchanged during V1 implementation.
+17. Database-backed readiness proof must use the connected, authorized staging Supabase project through MCP with dedicated test data. Flask, local, mock, and sandbox databases may support unit development but do not prove SaleAura database readiness.
+18. Every implemented or repaired feature must include Playwright coverage of normal journeys, valid boundary cases, relevant invalid/failure/cancellation/authorization/quota cases, and affected shared-behavior regressions.
+19. Unit, contract, and integration checks are supporting evidence; they do not replace the required Playwright result and real staging Supabase MCP evidence.
+20. Polar is the only payment provider for SaleAura validation. Non-production payment, subscription, webhook, and portal journeys use Polar sandbox; production Polar requires separate CEO authorization.
 
 ## Acceptance Criteria
 
@@ -508,6 +512,9 @@ Category-specific verification must cover at least:
 * Owner-only data is protected by authentication and ownership validation.
 * Public endpoints expose only intentionally public customer-safe data.
 * Implementation includes appropriate targeted tests or documented validation for the PRD requirements.
+* Each implemented/repaired feature has recorded Playwright evidence for normal, valid-boundary, failure/negative, and relevant regression scenarios.
+* Database-backed readiness evidence uses the authorized staging Supabase MCP project and dedicated test data; it does not rely on Flask, local, mock, or sandbox databases.
+* Non-production payment evidence uses Polar sandbox only; no real payment charge is made.
 * No deployment migration is implemented under this PRD unless separately approved later.
 * Unrestricted chat/payment writes, unintended raw inventory/embedding exposure, and over-broad database function grants are addressed.
 * Legal-document content remains unchanged during V1 implementation.

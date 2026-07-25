@@ -45,6 +45,34 @@ When records conflict, use this order:
 
 Stop with `STATE_INCONSISTENT` when the conflict cannot be resolved without changing a higher-priority source.
 
+## Change Intake and Minimal Artifact Loading
+
+Do not require every agent to reread every project document on every prompt. Each
+agent reads its own artifact plus only the direct predecessor artifacts and
+handoff evidence required by the current workflow stage.
+
+Classify a new request before any code or downstream artifact is changed:
+
+1. **New requirement, changed product behavior, or approved out-of-scope work**
+   starts with the CEO request. Product Manager records the approved change in
+   the feature PRD. The work then follows the normal planned sequence:
+   `CEO Request → Product Manager → Architect → Developer → QA → Reviewer → Final Report`.
+   If it changes a locked release-plan scope, dependency, or milestone, the
+   Orchestrator records approved change control before the feature proceeds.
+2. **Implementation defect within the already approved PRD and architecture**
+   starts with a QA finding and follows the bounded-repair path:
+   `QA Finding → Developer → QA → Reviewer`.
+   Do not create a new CEO request or rewrite the PRD merely to describe a bug
+   fix that stays inside approved scope.
+3. **Unclear classification or a conflict with an approved artifact** requires
+   an explicit CEO decision. Stop rather than treating a coding prompt as
+   authorization to redefine scope.
+
+Developer prompts must identify the current stage and name the direct handoff
+artifacts to read. A Developer records completed implementation only in
+`implementation-report.md`; downstream QA, review, release-state, and final
+status are owned by their respective roles.
+
 ## Supported Workflow Modes
 
 ### Standard Implementation
@@ -159,5 +187,18 @@ Use the smallest correct implementation.
 Do not perform unrelated refactors.
 Preserve user-owned changes.
 Create Git checkpoints before and after meaningful changes when possible.
-Test database changes locally or in an isolated environment before shared staging.
+Use the real, authorized non-production Supabase project through the Supabase MCP for database-backed test proof. Do not use Flask, local databases, mock databases, or sandbox databases as evidence that SaleAura database behavior is ready. Production Supabase remains prohibited unless the CEO explicitly authorizes it.
 Do not apply production migrations or production billing changes without explicit CEO approval.
+
+## Mandatory Test and Provider Rules
+
+Every implemented or repaired feature must include proportionate automated tests and Playwright coverage before it can be handed to QA. Test coverage must include:
+
+* Normal/expected user journeys.
+* Valid or “good” boundary cases.
+* Invalid, failed, cancelled, unauthorized, quota-limited, and other relevant “bad” scenarios.
+* Regression checks for the shared behavior the feature can affect.
+
+Unit, contract, and integration checks are useful supporting evidence, but they do not replace Playwright. Playwright must verify the visible owner/customer outcome against the real authorized non-production Supabase project through MCP, using dedicated test data and never production data.
+
+Polar is the only permitted payment provider for SaleAura payment, subscription, checkout, webhook, and portal testing. Do not substitute a fake payment database, Flask route, or another payment provider as test proof. Any Polar chargeable or production-facing action still requires the CEO authorization already required by this workflow.

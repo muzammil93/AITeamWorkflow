@@ -46,10 +46,10 @@ No clarification required.
   * Production frontend build.
   * Python source compilation.
   * Python automated test discovery.
-  * Complete local baseline execution.
+  * Complete repository baseline execution.
 * Make the commands use repository-pinned dependencies and avoid network or production mutations after dependencies are installed.
 * Execute the baseline commands and record their actual success, failure, or unavailability without suppressing errors.
-* Document an isolated database-migration validation sequence and explicit rules for shared staging and production.
+* Document the authorized staging-Supabase-MCP migration/test validation sequence and explicit rules for production.
 * Define required evidence for feature branches, base/head commits, changed files, checks, migration checksums, recovery, and unrelated-work preservation.
 * Exercise the file-based workflow state model with non-mutating dry-run scenarios for:
   * Standard success.
@@ -68,9 +68,9 @@ No clarification required.
 * Removing Next.js ignored-error configuration before the application passes the relevant checks.
 * Implementing any F01–F15 product behavior.
 * Creating or applying a SaleAura V1 database migration.
-* Connecting to or mutating shared staging.
+* Applying a product migration or mutating shared staging as part of F00; F00 documents the authorized staging-MCP sequence for later feature work.
 * Any production database, billing, deployment, or legal-document change.
-* Adding an end-to-end browser framework, CI provider, new AI agent, dashboard, background job, or external integration.
+* Adding or operating Playwright as part of F00 itself; later implemented or repaired product features must use the approved Playwright plan. CI provider, new AI agent, dashboard, background job, or external integration work remains out of scope.
 * Rewriting existing product setup documentation unrelated to the safety baseline.
 
 ## Assumptions
@@ -87,7 +87,7 @@ No clarification required.
 * As a developer, I want one reliable set of commands so I can validate every later feature consistently.
 * As QA, I want check results with exit codes and environment facts so I can distinguish passing evidence from missing evidence.
 * As a reviewer, I want branch, commit, changed-file, migration, and recovery records so I can audit feature boundaries.
-* As the CEO, I want migration work isolated from shared staging and production so later database changes cannot silently affect live systems.
+* As the CEO, I want database-backed readiness proof to use the authorized staging Supabase MCP project and dedicated test data, while production remains protected.
 * As the Orchestrator, I want workflow transitions dry-run against the locked state model so invalid routing is caught before product features depend on it.
 
 ## Functional Requirements
@@ -115,10 +115,10 @@ No clarification required.
 
 ### `BASE-004` — Migration isolation and shared safety
 
-1. Document a disposable local validation flow that applies future additive migrations against a reconstruction of the current schema.
+1. Document an authorized staging-Supabase-MCP validation flow for future additive migrations and database-backed feature tests, using dedicated test data and verified environment identity.
 2. Require checksum capture and schema/security verification for migrations.
 3. Forbid rewriting an applied migration.
-4. Forbid shared-staging application until local validation, review, backup/recovery planning, and explicit feature authorization are recorded.
+4. Forbid staging migration application until MCP environment verification, review, backup/recovery planning, and explicit feature authorization are recorded.
 5. Forbid production migration application without explicit CEO authorization.
 6. State that rollback is not assumed safe; prefer a reviewed forward fix when data may have changed.
 
@@ -142,7 +142,7 @@ No clarification required.
 1. `BASE-001` passes when both repository baselines and their clean/dirty states are recorded before product changes, and QA confirms no unrelated work was discarded.
 2. `BASE-002` passes when all seven named check categories are documented, runnable from a fresh repository with installed locked dependencies, and preserve underlying non-zero exits.
 3. `BASE-003` passes when the implementation report contains actual F00 results for TypeScript, lint, build, Python compile, Python tests, and workflow tests, including failures or unavailable checks.
-4. `BASE-004` passes when the safety documentation defines isolated validation, checksum, RLS/security inspection, shared-staging authorization, production prohibition, and forward-fix/recovery rules without applying a migration.
+4. `BASE-004` passes when the safety documentation defines authorized staging-MCP validation, checksum, RLS/security inspection, staging authorization, production prohibition, and forward-fix/recovery rules without applying a migration.
 5. `BASE-005` passes when QA can reconstruct the F00 base, branch/checkpoint, changed files, validation evidence, and safe reversal boundary from recorded evidence.
 6. `BASE-006` passes when an automated test command exercises all eight scenarios, rejects invalid routing, and leaves the live release state byte-for-byte unchanged.
 7. No product behavior, database, shared staging, production, billing, deployment, or legal content is changed.
@@ -152,7 +152,7 @@ No clarification required.
 * The current frontend lockfile exists but `node_modules` may be absent, making frontend results initially unavailable until the locked dependencies are installed. This must be recorded, not papered over.
 * The current `next lint` command may be incompatible with or deprecated by the installed framework toolchain; a failing result should guide a minimal canonical lint command rather than suppress linting.
 * Existing frontend debt may make typecheck or build fail. Repair belongs to the owning later feature unless the failure is caused by F00’s own safety implementation.
-* A local Supabase stack may not be installed. Because F00 owns no migration, documentation and dry-run safety checks are acceptable; the first migration-owning feature must execute the isolated flow.
+* The connected staging Supabase MCP may be unavailable. Because F00 owns no migration, documentation and dry-run safety checks are acceptable; the first migration-owning feature must execute the authorized staging-MCP flow when access is available.
 
 ## Status
 

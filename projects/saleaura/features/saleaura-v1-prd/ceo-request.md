@@ -69,6 +69,13 @@ SaleAura V1 is intended for a public paid launch and is focused specifically on 
 * Current build generation, build modification, compatibility validation, widget UI, imports, tests, and security need hardening.
 * Important security finding to carry into development: `public.leads` currently has RLS disabled in staging and must be fixed during development.
 
+## Testing and Environment Direction — 2026-07-22
+
+* The connected Supabase MCP is the authorized SaleAura staging database. Database-backed readiness proof must use that real non-production project and dedicated test data; Flask, local, mock, and sandbox databases are not acceptable readiness evidence.
+* Every implemented or repaired feature must include Playwright coverage of normal journeys, valid boundary cases, relevant invalid/failure/cancellation/authorization/quota cases, and shared-behavior regression paths. Unit and contract tests support this coverage but do not replace it.
+* Polar is the only permitted payment provider. Use Polar sandbox and its approved test methods for non-production payment, subscription, checkout, webhook, and portal validation. Production Polar remains separately gated by CEO authorization.
+* Production Supabase is not part of this policy and must remain disconnected from testing until the CEO explicitly authorizes production work.
+
 ## Requested Output
 
 Create the Product Manager PRD artifact only.

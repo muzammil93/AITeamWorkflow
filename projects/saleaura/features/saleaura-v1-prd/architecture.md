@@ -1287,11 +1287,11 @@ Use bounded retries only for safe idempotent operations. Avoid automatic retries
 
 ## Testing Guidance
 
-The approved architecture authorizes a minimal automated test foundation because the PRD explicitly requires production readiness and the repository currently has no tests.
+The approved architecture requires layered automated coverage and real staging proof. Unit and contract tests provide fast regression feedback; Playwright and the authorized staging Supabase MCP provide the database-backed readiness evidence.
 
 ### Python
 
-Use Python’s standard `unittest` and Flask test client initially to avoid a new runtime dependency.
+Use Python’s standard `unittest` and Flask test client for unit-level behavior initially to avoid a new runtime dependency. Flask test-client results are not database-backed readiness proof.
 
 Cover:
 
@@ -1311,7 +1311,15 @@ Cover:
 * AI quota behavior for model-backed versus structured actions.
 * Customer-safe DTO projection.
 
-Mock OpenAI, Supabase, Google Sheets, Cloudinary, SMTP, WhatsApp, and Polar at unit boundaries. Add targeted staging integration checks separately.
+Mocks may be used at unit boundaries for OpenAI, Supabase, Google Sheets, Cloudinary, SMTP, WhatsApp, and Polar. They are not readiness evidence for persistence, authorization, migration, or payment behavior.
+
+### Required Staging and Browser Evidence
+
+Every implemented or repaired feature must include Playwright coverage for its normal journey, valid boundary conditions, relevant invalid/failure/cancelled/unauthorized/quota states, and affected shared-behavior regressions.
+
+Use the connected, authorized non-production Supabase staging project through MCP for database-backed verification, with dedicated test data and safe record-level evidence. Do not use Flask, local, mock, or sandbox databases as proof that SaleAura persistence is ready. Production Supabase remains out of scope until explicitly authorized.
+
+Polar is the only payment provider. Non-production checkout, subscription, webhook, and portal verification uses Polar sandbox and approved test payment methods; no real payment charge is permitted.
 
 ### TypeScript/React
 
@@ -1331,7 +1339,7 @@ Introduce Vitest and React Testing Library as minimal development-only dependenc
 * Voice controls remaining hidden.
 * Urdu direction and mobile card states.
 
-Do not introduce a broader end-to-end framework under this feature unless the Developer is blocked from validating an acceptance criterion and receives approval.
+Playwright is the required end-to-end framework for feature readiness. Do not introduce an additional end-to-end framework unless the Developer is blocked from validating an acceptance criterion and receives approval.
 
 ### Database
 

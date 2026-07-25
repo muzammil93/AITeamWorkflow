@@ -20,7 +20,7 @@ Use this document with `saleaura-v1-playwright-e2e-plan.md`. Update it during ea
 | Current run ID | `RUN-20260718-001` |
 | Target | `STAGING ONLY` |
 | Application version/commit | `183fef4` |
-| Test plan version | `1.0` |
+| Test plan version | `1.1` - F07 inventory repair added; implementation and recorded re-test pending |
 | Started | `2026-07-18 04:14 PKT` |
 | Finished | `-` |
 | Operator | `Codex` |
@@ -67,6 +67,81 @@ Use this document with `saleaura-v1-playwright-e2e-plan.md`. Update it during ea
 | E2E-031 | Customer/system | Required | - | PASS (unapproved-origin subset) | RUN-20260719-E2E031-001 | `SaleAura-WebApp/test-results/staging-e2e-evidence/e2e-031-unapproved-widget-host-20260719-002/embedded-widget-E2E-031-an-6633a--render-the-widget-launcher-desktop-chromium/video.webm` | An unapproved external origin received `403` from bootstrap and rendered no widget launcher. Fake/expired sessions and rate-limit recovery remain pending catalog-backed coverage. |
 | E2E-032 | All selected | - | Required | NOT_RUN | - | - | - |
 
+## F07 Inventory Follow-up Register
+
+The following cases are the approved, strictly ordered Google Sheets inventory run. They must be implemented as Playwright-only browser journeys. Evidence for each case is retained under `SaleAura-WebApp/tests/InventoryTest/evidence/<run-id>/<test-id>/`; the feature test scripts live separately under `SaleAura-WebApp/tests/FeatureTests/Inventory/`.
+
+| Test ID | Persona | Desktop | Mobile | Status | Run ID | Evidence | Finding ID / notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| F07-INV-001 | OWNER-SHEET | Required | - | PASS | RUN-20260722-F07-BROWSER-002 | Visible Chrome, authenticated staging owner | Supplied Sheet previewed; cancelling preview retained the canonical selected-sheet URL, connection label, and `Sync & Preview` CTA. Chrome logged no warnings/errors; no inventory save occurred. |
+| F07-INV-002 | OWNER-SHEET | Required | - | PASS | RUN-20260722-F07-FIXTURE-001 | Visible Chrome; Supabase MCP | Backup-protected source reached exactly 500 rows; sync added one QA SKU and MCP confirmed 500 Google-managed rows. |
+| F07-INV-003 | OWNER-SHEET | Required | - | PASS | RUN-20260722-F07-FIXTURE-001 | Visible Chrome; Supabase MCP | Existing QA SKU name updated at 500/500 with zero new additions or skipped rows; stable identity confirmed. |
+| F07-INV-004 | OWNER-SHEET | Required | - | PASS | RUN-20260723-F07-RETEST-001 | Visible Chrome via Playwright CDP; Supabase MCP | Fully valid 501-row fixture: quota dialog allowed the existing update, skipped only one new SKU, and reported a quota-specific partial result. Existing SKU updated; over-limit SKU absent; source removals remained blocked. |
+| F07-INV-005 | OWNER-SHEET | Required | - | PASS | RUN-20260723-F07-RETEST-001 | Visible Chrome via Playwright CDP; Supabase MCP | A labelled middle-row source SKU was added, then removed at row 250. Complete sync permanently deleted exactly that inventory row; final cleanup restored the 499-row baseline. |
+| F07-INV-006 | OWNER-SHEET | Required | - | PASS | RUN-20260722-F07-FIXTURE-001 | Visible Chrome; Supabase MCP | QA SKU moved from row 501 to row 3; one stable source-key inventory row remained with no insert/delete. |
+| F07-INV-007 | OWNER-SHEET | Required | - | RETEST_REQUIRED | RUN-20260722-F07-FIXTURE-001 | Visible Chrome; Supabase MCP | Duplicate SKU preview failed with a row-specific message and inventory remained unchanged. Missing-ID, inaccessible, wrong-worksheet, and cancellation variants remain. |
+| F07-INV-008 | OWNER-SHEET | Required | - | PASS | RUN-20260723-F07-RETEST-001 | Visible Chrome via Playwright CDP | Accepted replacement confirmation switched to the backup worksheet without inventory sync; accepted replacement back to the original then preview cancellation restored its canonical URL. |
+| F07-INV-009 | OWNER-PAID | Required | - | PASS | RUN-20260723-F07-RETEST-001 | Visible Chrome via Playwright CDP; Supabase MCP | Manual individual/cancel/selected/Select All/bulk delete and CSV individual delete passed. Google-managed selection and direct actions were disabled with source guidance. All fixtures were absent in MCP after UI deletion. |
+| F07-INV-010 | OWNER-SHEET / OWNER-OTHER | Required | Required | BLOCKED | RUN-20260723-F07-RETEST-001 | Visible Chrome via Playwright CDP | Mobile portion passed after the scoped dashboard `min-w-0` repair: controls were usable and body/document width measured 390px at 390×844. Cross-owner isolation still requires a second authorized staging owner. |
+
+## Active F07 Inventory Findings
+
+### F07-INV-FINDING-001 - Full quota treats a Sheet product-name update as a new product
+
+Status: VERIFIED
+
+Severity: High
+
+Affected tests: `F07-INV-003`, `F07-INV-004`
+
+Expected: At 500/500, changing only an existing product name remains an update and can be saved.
+
+Actual: The preview reports a new row, reports zero updates, opens an upgrade-focused popup, and disables Continue.
+
+Fix request: Use one stable product identity for preview and final save; updates must not consume a new inventory slot.
+
+### F07-INV-FINDING-002 - A removed Google Sheet row remains in SaleAura inventory
+
+Status: VERIFIED
+
+Severity: High
+
+Affected tests: `F07-INV-005`, `F07-INV-006`
+
+Expected: Removing a Sheet product and saving a complete successful sync permanently removes that exact SaleAura inventory product without affecting any other row.
+
+Actual: The raw inventory count remains at 500 after a Sheet row is removed. Current row-position matching also risks incorrect updates when rows are deleted or reordered.
+
+Fix request: Use a stable Sheet product identity and permanently remove missing source products only after a complete successful sync.
+
+### F07-INV-FINDING-003 - Google Sheet inventory controls do not explain the source-managed workflow
+
+Status: PARTIALLY_VERIFIED
+
+Severity: Medium
+
+Affected tests: `F07-INV-001`, `F07-INV-009`, `F07-INV-010`
+
+Expected: The connected URL is visible after connection, later CTA text describes sync, and disabled Google-managed actions tell the owner to change the Sheet and sync.
+
+Actual: The page keeps `Connect & Preview`, clears the URL field, and leaves disabled actions without an understandable next step.
+
+Fix request: Show the connected source in the editable field, use source-aware CTA/result text, and provide visible action guidance.
+
+### F07-INV-FINDING-004 - Manual and CSV inventory lack Delete and bulk Delete
+
+Status: PARTIALLY_VERIFIED
+
+Severity: Medium
+
+Affected tests: `F07-INV-009`, `F07-INV-010`
+
+Expected: An owner can select eligible Manual/CSV products, select all matching products, and permanently delete after confirmation.
+
+Actual: The Inventory page has no individual Delete, selection, Select All, or bulk Delete action.
+
+Fix request: Add clear, owner-scoped Delete and bulk Delete controls for Manual/CSV rows only; Google-managed rows explain the source rule.
+
 ## Run Log
 
 Add one entry per run. Never overwrite an earlier row.
@@ -92,6 +167,13 @@ Add one entry per run. Never overwrite an earlier row.
 | RUN-20260719-E2E018-001 / RUN-20260719-E2E018M-001 | 2026-07-19 06:36 PKT | E2E-018 multilingual customer grounding | Desktop Chrome and iPhone 13 viewport, visible | local changes | PASS | 2 | 0 | 0 | `SaleAura-WebApp/test-results/staging-e2e-evidence/e2e-018-customer-language-20260719-001/`; `SaleAura-WebApp/test-results/staging-e2e-evidence/e2e-018-customer-language-mobile-20260719-001/` | One real external widget session completed an English comparison, Urdu product search, and Roman Urdu product search. Each structured result contained only the seeded active catalog products; temporary host cleanup passed. |
 | RUN-20260719-E2E019-001 / RUN-20260719-E2E019M-001 | 2026-07-19 07:14 PKT | E2E-019 full-catalog customer builds | Desktop Chrome and iPhone 13 viewport, visible | local changes | PASS | 2 | 0 | 0 | `SaleAura-WebApp/test-results/staging-e2e-evidence/e2e-019-full-catalog-builds-desktop-20260719-005/`; `SaleAura-WebApp/test-results/staging-e2e-evidence/e2e-019-full-catalog-builds-mobile-20260719-001/` | The app imported the supplied 500-row CSV through Inventory. Gaming, editing, office, and general-use requests each returned a complete eight-component verified build within PKR 900,000. Final database check: 500 total, 500 active/in stock; temporary widget host cleanup passed. |
 | RUN-20260719-E2E020-001 / RUN-20260719-E2E020M-001 | 2026-07-19 14:40 PKT | E2E-020 safe no-build outcomes | Desktop Chrome and iPhone 13 viewport, visible | local changes | PASS | 2 | 0 | 0 | `SaleAura-WebApp/test-results/staging-e2e-evidence/e2e-020-unsafe-builds-desktop-20260719-002/`; `SaleAura-WebApp/test-results/staging-e2e-evidence/e2e-020-unsafe-builds-mobile-20260719-002/` | A PKR 1,000 request returned actionable no-build guidance. After temporarily disabling Cooling, the widget identified Cooling as missing and returned no partial build. Cleanup restored all 20 Cooling products and removed the temporary host. |
+| RUN-20260722-F07-STAGING-DB-001 | 2026-07-22 21:56 PKT | F07 staging migration preflight and verification | Authorized staging Supabase MCP | local follow-up changes | PASS (database only) | 1 | 0 | 0 | Supabase migration ledger and index inspection | Confirmed staging project identity; 500 Google rows had zero blank SKUs and zero duplicate source identities; applied `20260722165610_f07_google_sheet_safe_sync_and_delete`; verified `inventory_google_sheet_source_row_identity_idx`. This is not a Playwright result; all F07 browser cases remain BLOCKED awaiting dedicated owner and controlled Sheet fixtures. |
+| RUN-20260722-F07-BROWSER-001 | 2026-07-22 22:15 PKT | F07-INV-001 connect/sync preview entry | Visible Chrome, authenticated staging owner | local follow-up changes | BLOCKED | 0 | 0 | 1 | Chrome console capture; `inventory-upload-error` | Inventory and Sheets mode rendered; console had no warnings/errors. Preview of the supplied Sheet returned `GOOGLE_SHEETS_CREDENTIALS not found in environment` from the local Flask backend before connection persistence. Existing worksheet connection remained unchanged. |
+| RUN-20260722-F07-BROWSER-002 | 2026-07-22 22:34 PKT | F07-INV-001 saved source, preview, cancel, and later sync CTA | Visible Chrome, authenticated staging owner | local URL-preservation repair | PASS | 1 | 0 | 0 | Chrome console capture | After starting the local application service with authorized staging configuration, the supplied Sheet previewed successfully. Cancel retained `https://docs.google.com/spreadsheets/d/1xL_0v5e6evSKBx6--WNCKKEltw0MPE-xwyvxZw8XyiE/edit#gid=1332864850`; connected worksheet and `Sync & Preview` remained visible. No inventory save and no browser warnings/errors. |
+| RUN-20260722-F07-BROWSER-003 | 2026-07-22 22:38 PKT | F07 complete sync and same-source preview last-result regression | Visible Chrome and authorized staging Supabase MCP | local lifecycle-preservation repair | PARTIAL_PASS | 2 | 0 | 0 | Chrome console capture; Supabase MCP connection/inventory query | Complete save reported 0 added, 1 updated, 498 unchanged, 1 deleted, 0 skipped; MCP confirmed 499 Google rows and successful connection status. QA repaired same-source preview clearing the last result; live re-test retained successful timestamp, canonical URL, connection label, and `Sync & Preview` with no console warnings/errors. The supplied source currently has 499 rows, so the exact 500-row fixture and remaining lifecycle variants are still required. |
+| RUN-20260722-F07-OWNER-ACTIONS-001 | 2026-07-22 23:05 PKT | F07-INV-009 Manual delete entry and fixture-edit readiness | Visible Chrome, authorized staging Supabase MCP, supplied Sheet | local follow-up changes | BLOCKED | 0 | 0 | 2 | Google Sheets permission response; MCP cleanup query | Service account read access was confirmed but backup worksheet creation returned Google `403`; no Sheet rows changed. Manual QA-row automation did not return a trustworthy UI completion result. The exact leftover row was deleted through MCP cleanup and verified absent; cleanup is not owner-action evidence. |
+| RUN-20260722-F07-FIXTURE-001 | 2026-07-22 23:30 PKT | F07-INV-002 to F07-INV-008 editable Sheet lifecycle subset | Visible Chrome, editable Google Sheet, authorized staging Supabase MCP | local follow-up changes | PARTIAL_PASS | 4 | 0 | 4 | In-workbook backup `QA-F07-BACKUP-20260722183135`; Chrome results; MCP queries | Passed exact 500-row save, full-capacity update, reorder identity, and replacement cancel. Partial evidence covers quota update-plus-new, final-row removal/re-add, and duplicate-ID failure. Original Sheet and staging inventory restored to 499 rows with no QA rows. |
+| RUN-20260723-F07-RETEST-001 | 2026-07-23 01:33 PKT | F07-INV-004, F07-INV-005, F07-INV-007 partial, F07-INV-008, F07-INV-009, F07-INV-010 partial | Visible Chrome via Playwright CDP; 390×844 viewport; authorized staging Supabase MCP | local follow-up changes | PARTIAL_PASS | 5 | 0 | 2 | Browser results and MCP final baseline query | Passed clean quota update-plus-new (including quota-specific result repair), middle-row deletion, accepted source replacement, Manual/CSV owner delete controls, Google guidance, and the mobile layout re-test. Missing-SKU and nonexistent-GID source errors passed; inaccessible source remains. Only the missing second owner blocks F07-INV-010. Final staging baseline: 499 Google rows, zero QA rows. |
 | - | - | - | - | - | NOT_RUN | 0 | 0 | 0 | - | - |
 
 ## Finding Register

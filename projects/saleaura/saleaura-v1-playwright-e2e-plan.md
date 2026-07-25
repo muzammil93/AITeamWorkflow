@@ -4,15 +4,15 @@
 
 Plan ID: `SALEAURA-E2E-STAGING-001`
 
-Version: `1.0`
+Version: `1.2`
 
-Status: `APPROVED_FOR_DOCUMENTATION - NOT_YET_IMPLEMENTED`
+Status: `APPROVED_FOR_IMPLEMENTATION_AND_QA - F07_INVENTORY_REPAIR_PENDING`
 
 Environment: Staging application, staging Supabase, and Polar sandbox only.
 
 Production: Explicitly out of scope until separately authorized.
 
-Scope: F01-F06 and F08-F14. F07 Google Sheets is intentionally deferred.
+Scope: F01-F14, including the approved F07 Google Sheets inventory follow-up.
 
 Purpose: Validate the complete experience of a PC-component shop owner and that shop's customers. The browser suite must prove the visible result, the correct owner-scoped result in staging data where appropriate, and safe recovery when something fails.
 
@@ -21,9 +21,13 @@ Purpose: Validate the complete experience of a PC-component shop owner and that 
 * Test only dedicated staging accounts and dedicated test customer data. Never use a real customer account or production service.
 * A browser test represents one real user journey. It must begin from a known state, state the persona, and clean up only the data it created.
 * Keep browser work in the order in this document. Later journeys consume the account, inventory, widget, chat, and lead data created by earlier journeys.
-* Use real staging integrations for the normal owner, payment-sandbox, widget, chat, lead, and notification paths. Use a controlled staging failure only for a failure path that cannot safely be induced with a real provider.
+* Use real staging integrations for the normal owner, Polar-sandbox payment, widget, chat, lead, and notification paths. Use a controlled staging failure only for a failure path that cannot safely be induced with a real provider.
+* Database-backed test proof uses the connected authorized staging Supabase project through MCP and dedicated test data. Flask, local, mock, and sandbox databases do not count as database readiness evidence.
+* Each feature run includes normal journeys, valid boundary cases, relevant invalid/failure/cancelled/unauthorized/quota cases, and regression cases for affected shared behavior.
 * Do not put passwords, session tokens, service keys, private email addresses, phone numbers, payment details, or raw provider responses in videos, traces, reports, or source control.
 * Google login is a one-time manual checkpoint. The tester signs in to the dedicated Google account when prompted; Playwright stores only the resulting test-session state outside the repository.
+* F07 Sheet changes are made through the dedicated Google Sheet in Playwright, then verified through SaleAura in Playwright. The F07 suite does not use direct database calls as test proof.
+* Google-managed products are changed or removed in Google Sheets and then synced. Direct Edit, Archive, Delete, and bulk Delete are limited to Manual and CSV products.
 * Payment testing uses Polar sandbox and its approved test payment method. It must never charge a real card.
 * Email and WhatsApp delivery have two evidence levels: automated staging request/result evidence, then manual receipt confirmation from the designated test inbox and phone.
 
@@ -33,6 +37,7 @@ Purpose: Validate the complete experience of a PC-component shop owner and that 
 | --- | --- | --- | --- |
 | `OWNER-FREE` | Newly completed owner on Free | Empty catalog, active free access | Onboarding, free limits, profile, protected routes |
 | `OWNER-PAID` | Newly completed owner on Starter | Empty catalog, active paid access | Paid checkout, 500-row catalog, widget, dashboard |
+| `OWNER-SHEET` | Completed owner on Starter | Dedicated 500-product Google Sheet with stable product IDs | Google Sheet connect, sync, quota, removal, and source guidance |
 | `OWNER-RETAINED` | Previously paid owner after sandbox cancellation/expiry | Existing catalog, chats, and leads | Retained access and reactivation |
 | `OWNER-OTHER` | Separate completed shop owner | Separate catalog and widget | Owner/data isolation |
 | `CUSTOMER-SEARCH` | Anonymous shopper | New browser/session | Search, no-result, product cards, comparison |
@@ -57,6 +62,7 @@ Every Playwright test must produce and retain:
 * Playwright trace for a failed or retried test.
 * Test input summary with secrets and personal data redacted.
 * Where a server-side result is essential, a minimal safe verification record: record ID/count/status only, never raw private payloads.
+* For every F07 case, separate recordings show the source Sheet change and the corresponding SaleAura owner result. Both recordings use the same run ID and test ID.
 
 Video exception: the manual Google credential-entry screen is excluded from recording. Recording begins again immediately after the provider returns to SaleAura. This protects the dedicated account while preserving evidence of SaleAura's callback result.
 
@@ -99,6 +105,23 @@ All tests run serially within a persona/data group. Independent groups may run s
 | `E2E-011` | CSV duplicate/update behavior | `ProductListing - Duplicate Update Cases.csv` | Existing SKU/alias rows update without duplicates; changed values appear correctly |
 | `E2E-012` | Reviewed build catalog | Clean import of `ProductListing - 500.f04-reviewed.csv` | Eligible/ineligible state and required component coverage are available for build paths |
 | `E2E-013` | Manual inventory lifecycle | Create invalid/valid product, edit, upload image/link, archive, reactivate, zero stock, search/filter/sort/page | Owner sees accurate state/reasons; customer visibility follows active/in-stock rules |
+
+### Phase 2A - Google Sheet Inventory Sync
+
+Google-managed products are always edited or removed in the connected Google Sheet. The owner returns to SaleAura, uses `Sync & Preview`, reviews the planned result, and then saves it. Tests run in the listed order because each later case relies on the correctly synced catalog from the earlier case.
+
+| Test ID | Journey | Checks | Pass condition |
+| --- | --- | --- | --- |
+| `F07-INV-001` | First connection and saved source | First URL entry, selected worksheet, preview, cancel, refresh, saved URL, worksheet name, and first-sync CTA | The owner sees the saved connected Sheet and `Sync & Preview`; no URL must be pasted again |
+| `F07-INV-002` | Initial 500-product Sheet save | Preview and save the dedicated 500-product Sheet | Exactly 500 source products are visible and the result clearly reports the saved counts |
+| `F07-INV-003` | Update at full quota | Rename one known product at 500/500, then sync and save | The row is an update, not a new product; no quota block appears |
+| `F07-INV-004` | Update plus new row at full quota | Change one known product and add one new product at 500/500 | The update is saved, only the new row is skipped, and the quota message is clear |
+| `F07-INV-005` | Source removal and re-add | Remove a middle and a final Sheet row in separate syncs, then re-add one | The exact removed product disappears after each completed sync; other products remain correct; a re-added product follows the normal new-row quota rule |
+| `F07-INV-006` | Reorder and identity safety | Reorder rows and change safe fields on known products | Row order does not swap, duplicate, or change product identity |
+| `F07-INV-007` | Invalid and interrupted source states | Missing/duplicate stable ID, invalid row, inaccessible Sheet, wrong worksheet, cancelled preview, failed read | The owner gets a clear recovery message and existing inventory is unchanged |
+| `F07-INV-008` | Source replacement | Paste a different worksheet and accept or cancel the replacement confirmation | Nothing changes until confirmed; the selected result is accurately shown afterward |
+| `F07-INV-009` | Inventory actions and guidance | Google-managed row help; Manual/CSV single Delete, selected-row Delete, Select All, bulk Delete, cancel, confirm, search, filter, pagination | Google rows explain the Sheet rule; eligible owner rows delete only after clear confirmation |
+| `F07-INV-010` | Isolation and responsive regression | Repeat the core connect, full-quota update, removal, and action-guidance cases as another owner and on mobile | No cross-owner access; all controls, alerts, and text remain usable on mobile |
 
 ### Phase 3 - Widget Installation and Customer Search
 
@@ -149,7 +172,7 @@ All tests run serially within a persona/data group. Independent groups may run s
 | F04 Compatibility | E2E-012 to E2E-013, E2E-019 to E2E-022 |
 | F05 Performance reference | E2E-019, E2E-021 to E2E-022 |
 | F06 CSV pipeline | E2E-006, E2E-009 to E2E-012 |
-| F07 Google Sheets | Deferred by approved scope decision |
+| F07 Google Sheets | F07-INV-001 to F07-INV-010 |
 | F08 Widget platform/security | E2E-014 to E2E-015, E2E-028, E2E-031 |
 | F09 Search/comparison | E2E-016 to E2E-018 |
 | F10 Build generation | E2E-019 to E2E-020 |
@@ -162,9 +185,9 @@ All tests run serially within a persona/data group. Independent groups may run s
 
 | Run | Tests | Trigger | Release rule |
 | --- | --- | --- | --- |
-| Smoke | E2E-000, 001, 004, 009, 014 to 016, 023 to 025, 027 | Every meaningful staging change | All pass; no Critical/High open finding |
-| Full desktop | E2E-000 to E2E-031 | Feature-complete staging candidate | All in-scope tests pass or have an approved documented blocker |
-| Full mobile | E2E-001, 002, 004, 006, 014 to 027, 032 | Same candidate after desktop pass | All selected tests pass; no responsive Critical/High finding |
+| Smoke | E2E-000, 001, 004, 009, F07-INV-001, F07-INV-003 to F07-INV-005, 014 to 016, 023 to 025, 027 | Every meaningful staging change | All pass; no Critical/High open finding |
+| Full desktop | E2E-000 to E2E-031 and F07-INV-001 to F07-INV-009 | Feature-complete staging candidate | All in-scope tests pass or have an approved documented blocker |
+| Full mobile | E2E-001, 002, 004, 006, 014 to 027, 032, and F07-INV-010 | Same candidate after desktop pass | All selected tests pass; no responsive Critical/High finding |
 | Re-test | Affected tests plus prerequisite/consumer tests | Developer marks a bug fixed | Fix test passes, regression set passes, original finding is closed with evidence |
 
 ## Defect Severity and Stop Rules
