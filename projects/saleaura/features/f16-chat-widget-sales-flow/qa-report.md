@@ -74,9 +74,10 @@ by the change.
 * `F16-QA-001` through `F16-QA-004`, `F16-QA-007`, and `F16-QA-008` are
   verified by desktop/mobile browser evidence.
 * `F16-QA-005` is partially verified: cart lead persistence, request versions,
-  notification-failure preservation, notification formatting, and Dashboard
-  detail rendering contracts pass. Visible Dashboard detail inspection and
-  provider content receipt remain open.
+  notification-failure preservation, notification formatting, and the complete
+  Dashboard details pass. Desktop and mobile `E2E-035` visibly verify email,
+  source, consent, current cart quantities/totals, and request versions 1 and 2.
+  Provider content receipt remains open.
 * `F16-QA-006` is partially verified: focused desktop/mobile coverage is now
   present, but the PRD-required cross-owner and quota/failure browser branches
   remain open.
@@ -109,8 +110,6 @@ completed.
 * Live email delivery succeeded during the cart lead runs. Live WhatsApp calls
   returned `401 Authentication Error`; the saved lead remained intact as
   required, but successful WhatsApp notification content is not verified.
-* The Dashboard lead-details source contract passes, but a visible owner
-  Playwright assertion for complete contact/cart/version details remains.
 * Supabase advisors still report pre-existing security and performance warnings,
   including permissive policies/GraphQL grants and RLS initialization-plan
   findings. They are not introduced by F16, but must be reconciled by the
