@@ -24,6 +24,99 @@ The existing public widget securely starts an anonymous owner-bound session, sea
 
 The current widget is not production-ready for the approved cart-to-lead sales journey. A focused F16 delta is required. No test, code, database, provider, or production mutation occurred during this audit.
 
-Attempt Result: FAIL
+Attempt Result: BASELINE_FAIL
 
-STATUS: BASELINE_FAIL
+## Post-Implementation QA Attempt 1 — 2026-07-29
+
+### Scope
+
+Verified the implemented F16 cart-to-lead flow against the authorized staging
+Supabase project through the local staging-connected application on desktop and
+mobile. Supporting contract/unit checks were rerun for F08–F13 behavior affected
+by the change.
+
+### Passed Browser Evidence
+
+* Desktop `customer-cart.spec.ts` — `E2E-033`, `E2E-034`, and `E2E-035`: 3/3
+  passed in 2.0 minutes.
+* Mobile `customer-cart.spec.ts` — `E2E-033`, `E2E-034`, and `E2E-035`: 3/3
+  passed in 2.0 minutes.
+* The runs covered three-item CPU/keyboard/monitor cart creation, exact totals,
+  quantity increase, removal, validation errors, cancellation without a lead,
+  forged/replayed/expired offers, expired widget sessions, build expansion,
+  build/cart separation, consented lead persistence, and same-lead request
+  version updates.
+* Adjacent desktop regressions passed:
+  * `E2E-016` active/in-stock search: 1/1.
+  * `E2E-017` catalog comparison: 1/1.
+  * `E2E-018` English, Urdu, and Roman Urdu grounding: 1/1.
+  * `E2E-019` complete supported-purpose builds: 1/1.
+  * `E2E-020` budget/compatibility edge cases: 1/1.
+* `E2E-021` long-chat soak was skipped because `E2E_LONG_CHAT=1` was not
+  enabled; it is not required for the focused F16 attempt.
+
+### Passed Supporting Evidence
+
+* Seven Python unit tests passed for consent normalization, quota rejection,
+  notification-failure preservation, notification cart formatting, and exact
+  catalog-name search.
+* Three focused search fallback checks passed, including safe generic-category
+  relaxation and preservation of explicit GPU filtering.
+* 21 Vitest checks passed across F08, F09, F10, F12, F13, and F16.
+* Python syntax passed for 40 files.
+* `pnpm exec tsc --noEmit` and `git diff --check` passed.
+* Supabase read-back after cleanup confirmed the dedicated owner is restored to
+  `starter`, with inventory limit/used `500/500`, 500 active in-stock products,
+  and 500 inventory embeddings.
+
+### Findings Verified
+
+* `F16-QA-001` through `F16-QA-004`, `F16-QA-007`, and `F16-QA-008` are
+  verified by desktop/mobile browser evidence.
+* `F16-QA-005` is partially verified: cart lead persistence, request versions,
+  notification-failure preservation, notification formatting, and Dashboard
+  detail rendering contracts pass. Visible Dashboard detail inspection and
+  provider content receipt remain open.
+* `F16-QA-006` is partially verified: focused desktop/mobile coverage is now
+  present, but the PRD-required cross-owner and quota/failure browser branches
+  remain open.
+
+### Preserved Failed Attempt and Recovery
+
+The first adjacent F09 regression command used legacy test setup that cleared
+the dedicated 500-row staging inventory and changed the profile to the free
+tier. QA stopped the run, restored the profile to active `starter`, re-imported
+the supplied 500-row CSV through the normal application flow, and verified 500
+active rows plus 500 embeddings through Supabase MCP. The affected search,
+comparison, and language tests were repaired to use uniquely named temporary
+rows with targeted cleanup; their reruns passed and left the catalog at exactly
+500 rows.
+
+The restore browser assertion itself timed out because it expected the obsolete
+message `Successfully saved 500 rows`; the application correctly displayed
+`Sync result: 500 added...`. The assertion now accepts the current success copy.
+Database count, category, and embedding read-back prove that the restore
+completed.
+
+### Open QA Evidence / Blockers
+
+* True cross-owner cart isolation cannot be executed because staging currently
+  has only one authorized owner profile. A second authorized staging owner is
+  required.
+* Quota rejection, forced cart-save failure, and notification-provider failure
+  are covered deterministically at the server boundary, but the PRD requires
+  recorded browser evidence for relevant quota/failure branches.
+* Live email delivery succeeded during the cart lead runs. Live WhatsApp calls
+  returned `401 Authentication Error`; the saved lead remained intact as
+  required, but successful WhatsApp notification content is not verified.
+* The Dashboard lead-details source contract passes, but a visible owner
+  Playwright assertion for complete contact/cart/version details remains.
+* Supabase advisors still report pre-existing security and performance warnings,
+  including permissive policies/GraphQL grants and RLS initialization-plan
+  findings. They are not introduced by F16, but must be reconciled by the
+  integrated readiness gate.
+* The source/staging F16 migration version provenance difference remains open.
+
+Attempt Result: QA_PARTIAL_PASS
+
+STATUS: QA_IN_PROGRESS
