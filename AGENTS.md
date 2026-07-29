@@ -190,6 +190,27 @@ Create Git checkpoints before and after meaningful changes when possible.
 Use the real, authorized non-production Supabase project through the Supabase MCP for database-backed test proof. Do not use Flask, local databases, mock databases, or sandbox databases as evidence that SaleAura database behavior is ready. Production Supabase remains prohibited unless the CEO explicitly authorizes it.
 Do not apply production migrations or production billing changes without explicit CEO approval.
 
+## Visible Chrome for Local Playwright Sign-In
+
+When a SaleAura staging Playwright run needs a fresh interactive owner session,
+open a separate visible Google Chrome profile at the required local route:
+
+```bash
+open -na "Google Chrome" --args \
+  --user-data-dir=/private/tmp/saleaura-f16-signin-chrome \
+  --remote-debugging-address=127.0.0.1 \
+  --remote-debugging-port=9224 \
+  --no-first-run \
+  --no-default-browser-check \
+  http://localhost:5001/auth
+```
+
+After the CEO signs in and reaches the dashboard, connect Playwright to
+`http://127.0.0.1:9224` and save that Chrome context to
+`SaleAura-WebApp/tests/e2e/qa-storage-state.json`. Do not print cookies, tokens,
+local storage, passwords, or the storage-state contents. Keep the visible Chrome
+window open until the storage state is saved and the staging preflight passes.
+
 ## Mandatory Test and Provider Rules
 
 Every implemented or repaired feature must include proportionate automated tests and Playwright coverage before it can be handed to QA. Test coverage must include:
