@@ -41,6 +41,9 @@ by the change.
   passed in 2.0 minutes.
 * Mobile `customer-cart.spec.ts` — `E2E-033`, `E2E-034`, and `E2E-035`: 3/3
   passed in 2.0 minutes.
+* Desktop and mobile `E2E-036` passed: an exhausted lead quota produces a
+  visible failure and no lead, then the dedicated owner's original counter is
+  restored.
 * The runs covered three-item CPU/keyboard/monitor cart creation, exact totals,
   quantity increase, removal, validation errors, cancellation without a lead,
   forged/replayed/expired offers, expired widget sessions, build expansion,
@@ -79,8 +82,8 @@ by the change.
   source, consent, current cart quantities/totals, and request versions 1 and 2.
   Provider content receipt remains open.
 * `F16-QA-006` is partially verified: focused desktop/mobile coverage is now
-  present, but the PRD-required cross-owner and quota/failure browser branches
-  remain open.
+  present, including forced cart-save failure and quota exhaustion, but the
+  PRD-required cross-owner browser branch remains open.
 
 ### Preserved Failed Attempt and Recovery
 
@@ -104,9 +107,6 @@ completed.
 * True cross-owner cart isolation cannot be executed because staging currently
   has only one authorized owner profile. A second authorized staging owner is
   required.
-* Quota rejection, forced cart-save failure, and notification-provider failure
-  are covered deterministically at the server boundary, but the PRD requires
-  recorded browser evidence for relevant quota/failure branches.
 * Live email delivery succeeded during the cart lead runs. Live WhatsApp calls
   returned `401 Authentication Error`; the saved lead remained intact as
   required, but successful WhatsApp notification content is not verified.
