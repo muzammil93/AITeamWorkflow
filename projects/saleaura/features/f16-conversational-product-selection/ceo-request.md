@@ -73,6 +73,23 @@ active Codex thread on 2026-07-30.
 * Do not change production, billing, deployment, or unrelated product
   behavior.
 
+## Exceptional Repair Authorization
+
+After QA completed a dedicated 10-conversation staging audit, two High findings
+remained open:
+
+* `F16-CPS-QA-003` — natural visible-product references could divert to lead
+  capture, guess an ambiguous card, or produce ungrounded no-pending recovery.
+* `F16-CPS-QA-004` — product-bearing assistant prose could contradict trusted
+  PKR cards with a foreign currency symbol.
+
+The controlled repair allowance had reached `2/2`. On 2026-07-30
+(Asia/Karachi), the CEO explicitly responded `Yes approved from my side`,
+authorizing one exceptional third F16 repair cycle and approving prose currency
+grounding as part of this F16 delta. The exceptional cycle must preserve the
+LLM-first semantic design, must not add a static phrase catalogue, and must
+return through fresh QA, a new 10-conversation first-run audit, and Reviewer.
+
 ## Workflow Classification
 
 This is a new customer-visible F16 behavior delta, not an implementation defect

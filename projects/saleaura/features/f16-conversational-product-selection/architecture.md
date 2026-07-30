@@ -10,7 +10,7 @@ F16 Conversational Product Selection and Cart Confirmation
 
 ## PRD Reference
 
-`features/f16-conversational-product-selection/prd.md`, `CPS-001`–`CPS-021`.
+`features/f16-conversational-product-selection/prd.md`, `CPS-001`–`CPS-026`, including CEO-authorized exceptional repair cycle `3/3` under `CC-004`.
 
 ## Master Architecture / Requirement References
 
@@ -18,21 +18,21 @@ Preserve the existing F08 protected widget-session, allowed-domain, authenticate
 
 ## Baseline QA Findings
 
-The visible card order and assistant prose could diverge; `first one` was not resolved against the visible first card; exact confirmation was skipped; preview opened lead capture; and `Hello` was accepted as a name. This design addresses those behaviors without changing search ranking or general lead scope.
+The original visible-order, confirmation, preview, and `Hello` defects remain covered. The QA 10-conversation audit additionally left `F16-CPS-QA-003` and `F16-CPS-QA-004` open: first-run natural references could divert to lead capture, ambiguous/no-pending/different-product/reject turns could be ungrounded, and discovery prose could contradict trusted PKR cards with foreign currency symbols. `CC-004` authorizes only the smallest repair of those two High findings.
 
 ## Dependency Validation
 
 * The owner-bound `widget_sessions` row and existing JSON `cart_state` remain authoritative for offers, cart, and bounded selection state.
 * The Flask chat service remains model-facing. The existing Next cart endpoint remains the sole cart-mutation authority.
 * Reuse existing opaque offer tokens, session authentication, customer-safe inventory serialization, quota, and abuse controls.
-* No DB migration is required because the state fits the existing `cart_state` JSON.
+* `CC-004` adds no cart-state shape, mutation, RPC, or DB migration. Preserve the already implemented CAS/terminal-receipt design unchanged.
 
 ## Technical Summary
 
 1. On each user chat send, the widget snapshots the exact rendered card order as opaque offer tokens with a monotonically increasing display revision.
 2. Flask authenticates the session, validates all tokens against that session's unexpired `cart_state.offers`, rejects stale revisions, and stores bounded `current_display`.
 3. Flask gives the LLM a bounded conversation window and trusted visible-product summaries derived server-side in accepted display order. Browser-authored product facts are never model or execution authority.
-4. The LLM returns only schema-validated `product_action.v1`: `select`, `confirm`, `reject`, `clarify`, or `no_action`. No static phrase, regex, or translated phrase catalogue interprets product intent.
+4. Before lead/general routing, Flask derives a trusted state mode and invokes the authoritative `product_action.v2` classifier. It returns only `select`, `confirm`, `reject`, `clarify`, or `no_action` plus a typed reason. No static phrase, regex, or translated phrase catalogue interprets product intent.
 5. Flask resolves `select` against the stored row, creates one pending confirmation, and asks the LLM to compose from only the trusted resolved fact envelope. No cart mutation occurs.
 6. A valid semantic `confirm` makes Flask issue a one-time confirmation ID and return typed `cart_action`; it emits no success claim.
 7. The widget calls Next `confirm_add`. Next revalidates and atomically mutates cart plus consumes the ID, or records a non-success outcome.
@@ -69,24 +69,42 @@ selection_state: {
 * Display expiry cannot exceed session or earliest offer expiry; pending expiry cannot exceed session, display, offer, or configured confirmation expiry. Clearing display clears tied pending state.
 * Hash random 256-bit confirmation and continuation secrets. Expected facts and receipts are safe snapshots for comparisons/messages, not current inventory authority.
 
-## Model Contract
+## State-Mode Model Contract
 
-The model sees numbered trusted summaries, not owner IDs, inventory IDs, opaque offer tokens, hidden fields, or mutation tools:
+Flask derives, supplies, and later verifies exactly one state mode from trusted session state: `visible_row`, `pending_confirmation`, or `no_actionable_context`. The model cannot choose or change it. The model sees bounded chat plus numbered trusted summaries/current pending facts, not owner IDs, inventory IDs, offer tokens, hidden fields, or mutation tools.
 
 ```json
 {
-  "contract": "product_action.v1",
+  "contract": "product_action.v2",
+  "state_mode": "visible_row|pending_confirmation|no_actionable_context",
   "action": "select|confirm|reject|clarify|no_action",
+  "reason": "resolved_reference|ambiguous_reference|uncertain_reference|confirmed|rejected|different_product_requested|no_pending_confirmation|not_product_action",
   "position": 1,
   "candidate_positions": [1, 2]
 }
 ```
 
-`position` is required only for `select`; bounded `candidate_positions` is allowed only for `clarify`; extra fields fail schema validation. Unsupported version/action, malformed output, out-of-range position, low confidence, or ambiguity adds nothing and produces a safe clarification/retry.
+`position` is required only for `select`; bounded `candidate_positions` is allowed only for `clarify`; extra fields and incompatible state/action/reason combinations fail validation. Server-generated failure reasons additionally include `malformed_output`, `unsupported_contract`, and `state_mismatch`.
 
-`select` resolves only against `current_display`. `confirm` requires matching unexpired pending state and no outstanding consumed execution. `reject` clears pending. A new resolved selection replaces pending and is never agreement to the old item. `clarify` and `no_action` never mutate cart authority.
+The classifier is authoritative before any lead/general model path whenever it produces a product action or a fail-closed product reason. Only a valid `no_action` + `not_product_action` result may release the turn to existing general/lead routing. The prompt must distinguish product inquiry from explicit buying-intent lead capture, but must do so semantically rather than with saved phrases.
 
-Confirmation and tool-result composition receive an exclusive trusted fact envelope. The LLM localizes natural English, Urdu, or Roman Urdu text but cannot introduce facts outside it. Existing safe-response checks apply; invalid output falls back to concise server composition from the same facts.
+State allowlists are mandatory:
+
+* `visible_row`: uniquely grounded intent may `select`; unanchored, multi-candidate, or uncertain intent must `clarify`; valid `no_action/not_product_action` alone may fall through.
+* `pending_confirmation`: agreement may `confirm`; decline/cancel must `reject/rejected`; a request for another item must `clarify/different_product_requested`; uncertainty must `clarify`. It cannot become lead capture or confirm the old item.
+* `no_actionable_context`: `select` and `confirm` are invalid. Apparent agreement/request without authority becomes `clarify/no_pending_confirmation`; only unrelated intent may be `no_action/not_product_action`.
+
+Malformed, unsupported, state-inconsistent, low-confidence, or uncertain outcomes never expose model prose. Flask maps the typed reason to a concise server-owned localized fallback grounded only in current display/pending facts. No fallback may mention internal schema terms such as `candidate_positions` or invent products/topics.
+
+For `reject`, Flask captures trusted pending facts, clears only pending authority, preserves `current_display`, and says the named item was not added. For `different_product_requested`, it prevents old confirmation, clears/replaces pending as appropriate, preserves the visible row, and asks which current alternative is intended. These transitions add nothing and keep the row available on the next turn.
+
+## Product Prose Grounding
+
+Every product-bearing response—discovery, comparison, confirmation, rejection, recovery, price change, unavailable, and successful add—must carry the trusted product DTO/fact envelope used for validation. Before persistence or delivery, Flask validates each prose monetary claim against canonical owner currency and exact trusted amounts for the products in that response.
+
+Currency codes/symbols/aliases come from canonical currency metadata, not semantic phrase matching. An amount is compared in canonical decimal/minor units; no conversion, rounding substitution, or foreign marker is accepted. Non-price specifications such as capacity or speed are not treated as monetary claims.
+
+On mismatch or unverifiable product money prose, discard the entire candidate response. Regenerate at most once using only trusted DTO facts, validate again, then use a deterministic localized safe fallback that either formats exact trusted amount/currency server-side or omits the price claim. Never repair by blind symbol replacement, and never change structured cards, identity, pending/cart state, or owner currency.
 
 ## Frontend Changes
 
@@ -102,8 +120,11 @@ Confirmation and tool-result composition receive an exclusive trusted fact envel
 ### Flask chat/session
 
 * Add strict validators for display, product-action, cart-action, and tool-result contracts.
+* Derive state mode before model invocation; run `product_action.v2` before lead/general routing and require an explicit validated `no_action/not_product_action` release token before fallthrough.
 * Accept display only after widget-session/owner and offer validation. Apply atomic/CAS revision rules: higher replaces; same is idempotent only with identical `render_id` and order; lower/conflicting returns `stale_display`.
 * Resolve indexed summaries from session offers and current customer-safe serializers. Never trust client/model identity or facts.
+* Convert invalid/uncertain/state-impossible semantic outputs to typed server reasons and state-grounded localized fallbacks. Preserve display across reject/different-product handling and retain pending facts long enough to name what was not added.
+* Apply amount/currency validation to every product-bearing prose response before transcript persistence or client delivery; foreign or conflicting money claims use bounded regeneration then deterministic safe fallback.
 * Persist pending before confirmation text. Confirmation text must include trusted name, SKU/equivalent key specification, relevant quantity, and price/currency.
 * On valid semantic confirmation, generate/hash a one-time confirmation ID, persist it, and return `cart_action` with no assistant success.
 * On internal continuation, authenticate the same session, resolve receipt by continuation hash, ignore client-authored facts/outcome, mark it continued atomically, and compose from stored trusted result. Replay returns the persisted assistant turn or safe idempotent response without a second tool continuation.
@@ -198,41 +219,45 @@ Every display, chat, confirmation, cart, and continuation call requires the same
 
 ## Error Handling
 
-Typed safe outcomes include `invalid_contract`, `stale_display`, `ambiguous_selection`, `no_pending_confirmation`, `pending_expired`, `offer_expired`, `price_changed`, `unavailable`, `unauthorized`, `rate_limited`, `quota_exhausted`, `conflict`, and `internal_error`. None claims an add. Malformed model output, timeout, auth failure, stale request, or exhausted CAS preserves cart. Price change requires reconfirmation; unavailable/expired clears pending.
+Typed safe outcomes include `invalid_contract`, `malformed_output`, `unsupported_contract`, `state_mismatch`, `ambiguous_selection`, `uncertain_reference`, `different_product_requested`, `no_pending_confirmation`, `stale_display`, `pending_expired`, `offer_expired`, `price_changed`, `unavailable`, `prose_fact_mismatch`, `unauthorized`, `rate_limited`, `quota_exhausted`, `conflict`, and `internal_error`. None claims an add. Semantic failures return only the state-grounded fallback; monetary mismatch never reaches the transcript/client. Cart behavior remains unchanged.
 
 Revision rules prevent late chat from restoring old order. Atomic consumption prevents double send, refresh, retry, two tabs, duplicate model confirmation, or continuation from adding twice. Persist the trusted result before responding so network retries recover it.
 
 ## Testing Guidance
 
-* Unit/schema: five actions; English/Urdu/Roman Urdu semantic fixtures without phrase matching; malformed/extra fields; bounds; normalization; pending transitions; receipt pruning; and `Hello`/name gate.
-* Contract: exact order and sort revision; same-revision idempotency; stale/conflicting display; ambiguous/out-of-range selection; trusted confirmation facts; no premature success; typed `confirm_add`; and internal continuation.
-* Authorized non-production Supabase integration: owner/session/offer isolation; preview token issuance; expiry; active/visible stock/price revalidation; price/stock change; CAS conflict; duplicate exactly-once; safe stored receipt; legacy JSON normalization; and no migration.
-* Desktop/mobile visible Playwright: mismatched prose/card order selects visible first; sorting changes first; exact confirmation; accept adds once, final LLM acknowledgement, refresh/open/focus; decline/cancel/different request adds nothing; ambiguity/failures recover; preview matches public; transcript resumes; three language modes; keyboard/assistive announcements; and `Hello` never opens/prefills lead capture.
-* Negative tests: forged, cross-owner/session, expired, replayed, malformed, rate/quota limited, ended session, price/stock changed, spoofed tool result, model/Next failure, and concurrent duplicates.
-* Use dedicated staging data. Local/mock DB is not readiness proof; production is prohibited.
+* Captured-model unit regressions must replay every audit failure: default and sorted natural ordinal returned as `lead_capture`; preview relative selection/consent returned as general message; unanchored `that one` guessed position one; no-pending consent mentioned `candidate positions`; different-product lost the visible row; rejection recommended an unrelated prose-first product; and discovery substituted `₱` or `₦` for PKR.
+* Contract tests must cover all state/action/reason allowlist combinations, mismatched echoed state, malformed/old version, low confidence, and routing precedence. Assert product/fail-closed results never invoke lead/general handling and only valid `no_action/not_product_action` does.
+* State transition tests must prove reject names the trusted pending product, clears pending, preserves display, and adds nothing; different-product prevents confirmation, preserves display, and asks for an alternative; no-pending consent is grounded; ambiguity never defaults to position one.
+* Prose-validator tests must cover correct/foreign codes, symbols, and aliases; conflicting amounts; multiple product DTOs; capacity/speed numbers; English, Urdu, and Roman Urdu; first validation failure followed by valid regeneration; second failure deterministic fallback; and no invalid text persisted or returned.
+* Rerun all existing deterministic, contract, authorized non-production Supabase, full F16 desktop/mobile/preview Playwright, lifecycle, cart concurrency/idempotency, multilingual/resume/accessibility, rate/quota, search/cart/lead/build, and cleanup checks. `CC-004` must not regress the verified cart/DB boundary.
+* QA must execute ten distinct clean staging sessions matching the prior audit categories: default ordinal; sorted ordinal plus rejection; different product while pending; ambiguous reference; consent without pending; explicit reject; expired confirmation; price change; unavailable with discovery pricing; and name plus Urdu/Roman Urdu/language switch/resume.
+* Acceptance is first-run only: preserve every original attempt; a rerun cannot replace a failure. Across all ten, require zero visible/sorted-reference errors, ambiguity guesses, pending/no-pending errors, different-product/reject context loss, product-action lead/general diversion, ungrounded fallback/internal terms, or amount/currency contradictions. Recovery carts remain closed; successful confirmation adds once and opens cart.
+* Use dedicated staging data with exact cleanup. Local/mock DB is not readiness proof; production is prohibited.
 
 ## Migration Validation and Recovery
 
-`NOT_APPLICABLE` — normalization must round-trip legacy cart data and safely omit/prune invalid new state. Rollback stops new reads/writes while leaving unknown JSON harmless; it must not delete carts/conversations. No production migration or data repair.
+`NOT_APPLICABLE` for `CC-004` — retain the existing cart-state normalization, CAS functions, terminal receipts, migration history, and grants unchanged. This repair adds no schema/migration/data repair and rollback affects only classifier/routing/prose-validation behavior.
 
 ## Git / Change Boundaries
 
-Developer changes are limited to existing Flask chat/widget-session and cart-state normalization code; existing widget/owner-preview chat UI; existing Next widget cart route; and directly corresponding unit, contract, integration, and Playwright tests/fixtures. Exact paths belong in `implementation-report.md`. Do not change search ranking, unrelated assistant claims, lead workflow beyond the name gate, inventory management, checkout, billing, subscription, migrations, deployment, or release artifacts.
+For exceptional repair `3/3`, Developer changes are limited to the existing Flask product-action prompt/schema/parser, state-aware chat/lead/general router, grounded product-response composer/validator, and directly corresponding captured-model, contract, integration, and Playwright tests/fixtures. Exact paths belong in `implementation-report.md`. Do not change frontend display/cart contracts, Next cart mutation, cart-state normalization, CAS/RPC functions, DB/migrations/grants, search ranking, lead contract, checkout, billing, subscription, deployment, production, or release artifacts.
 
 ## Risks
 
 * Model interpretation is probabilistic; explicit product confirmation and deterministic resolution fail closed.
+* A classifier can still be confidently wrong; state-specific prompts, strict routing precedence, captured failures, and first-run audit acceptance are required rather than relying on bounded reruns.
+* Prose validation can mistake technical numbers for money; validate only currency-marked/structured monetary claims against response DTOs and fall back safely on uncertainty.
 * Browser/server order can race; accepted monotonic revisions reject stale work.
 * Price/stock can change; Next checks immediately before session mutation, and inquiry cart reserves nothing.
 * Responses can be lost/retried; bounded persisted receipts preserve idempotency.
 
 ## Out of Scope / Not Implemented
 
-No static product-intent phrase catalogue, DB migration, production/deployment change, payment, checkout, order, reservation, stock decrement, ranking change, cross-session memory, lead redesign, or external integration.
+No static product-intent phrase catalogue, cart/DB redesign, new migration, production/deployment change, payment, checkout, order, reservation, stock decrement, ranking change, cross-session memory, lead redesign, unrelated prose rewrite, or external integration.
 
 ## Implementation Guidance
 
-Implement the smallest versioned additions around existing authentication, serializers, offer validation, cart mutation, and transcript persistence. Share/mirror schemas across browser, Flask, and Next. Fail closed on every unknown version/action/state. Client facts, model output, and response prose never become authority; cart opens only after stored `added`.
+Implement `product_action.v2` and universal product-prose validation at the existing Flask boundary. Keep session/display/pending/cart execution and APIs unchanged. Fail closed before persistence/routing on unknown state/version/action/reason or ungrounded money prose. Product semantics remain LLM-based; trusted code supplies mode, validates authority/facts, and chooses fallbacks. Cart opens only after stored `added`.
 
 ## Status
 

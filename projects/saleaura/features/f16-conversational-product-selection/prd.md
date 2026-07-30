@@ -72,6 +72,21 @@ During visible owner-preview testing:
 These observations define the approved behavior delta; formal QA findings will
 be owned by QA after implementation.
 
+## Exceptional Repair Delta — CC-004
+
+After the first implementation attempt and two bounded repairs, the dedicated
+10-conversation staging audit left `F16-CPS-QA-003` and `F16-CPS-QA-004` open.
+On 2026-07-30 (Asia/Karachi), the CEO authorized exceptional repair cycle
+`3/3` and explicitly brought equality between product-bearing assistant prose
+currency and trusted structured product/card facts into this F16 scope through
+release-plan change control `CC-004`.
+
+This exceptional delta is limited to reliable state-specific semantic product
+actions, grounded recovery, and trusted product prose. It preserves LLM
+understanding without a static phrase catalogue and does not authorize changes
+to search ranking, cart authority, lead workflow, checkout, billing,
+deployment, production data, or other unrelated assistant behavior.
+
 ## Clarifying Questions
 
 No open clarification blocks implementation. In this feature, `add to cart`
@@ -98,6 +113,9 @@ an order or complete a purchase.
   unavailable-product, and malformed-action behavior.
 * Equivalent selection and cart behavior in authenticated owner preview and
   the public customer widget.
+* Product-bearing assistant discovery, confirmation, recovery, and success
+  prose whose price amounts and currency are grounded to and equal the trusted
+  structured products and visible cards.
 * Protection against treating a greeting such as `Hello` as a person's name.
 * Complete shopper-visible chat continuity for the active session, kept
   distinct from bounded model input and bounded trusted action state.
@@ -267,6 +285,51 @@ an order or complete a purchase.
   quota/rate-limited, session-expired, and cross-owner/session behavior.
   Database-backed readiness evidence must use the authorized non-production
   Supabase project and dedicated test data; production mutation is prohibited.
+* `CPS-022` — The LLM product-action contract must be state-specific. Its
+  allowlisted semantic outcomes must be constrained by trusted server-supplied
+  state distinguishing at least a current visible row, an active pending
+  confirmation, and no actionable product context. The model may interpret
+  natural meaning within that state but may not make product identity or state
+  authoritative, and implementation must not use a static or translated phrase
+  list to classify references, consent, rejection, or cancellation.
+* `CPS-023` — In current visible-row context, a clear natural reference must
+  enter trusted selection resolution, while an unanchored or genuinely
+  ambiguous reference must add nothing and ask which visible product the
+  shopper means. In pending-confirmation context, rejection or cancellation
+  must clear the applicable pending selection and identify that nothing was
+  added; a request for a different product must not confirm the old product and
+  must retain enough current visible-row context to ask which alternative is
+  intended. Agreement with no valid pending confirmation must add nothing and
+  explain that the shopper must first search for or select a product.
+* `CPS-024` — When trusted visible-row or pending-confirmation context and the
+  shopper's semantic intent indicate a product action, that turn must not be
+  diverted to lead capture or unrelated general-assistant behavior. Lead
+  capture remains available only through its existing explicit buying-intent
+  contract. A malformed, unsupported, state-inconsistent, or low-confidence
+  model outcome must fail closed to a concise response grounded only in the
+  current trusted visible/pending state, preserve the cart, and give the next
+  safe action without inventing unrelated entities or topics.
+* `CPS-025` — Every price amount or currency representation in
+  product-bearing assistant prose, including discovery, comparison,
+  confirmation, recovery, and successful-add text, must equal the trusted
+  owner-currency amount supplied in the corresponding structured product or
+  visible card. Model-generated foreign symbols, codes, conversions, or
+  conflicting amounts must never reach the shopper. If trusted equality cannot
+  be established, SaleAura must omit the unverified price/currency claim or
+  render a grounded trusted fallback without changing the structured cards,
+  product identity, or cart state. This applies equally in English, Urdu, and
+  Roman Urdu.
+* `CPS-026` — Exceptional repair cycle `3/3` must receive fresh deterministic
+  captured-model regression coverage for every `F16-CPS-QA-003` and
+  `F16-CPS-QA-004` failure, the full applicable F16 browser matrix, and a new
+  QA-owned audit of ten distinct first-run conversations in clean staging
+  sessions. Every original first run must remain evidence rather than being
+  replaced by a bounded rerun. Release acceptance requires zero semantic
+  contradictions for visible ordinals, ambiguity, pending/no-pending,
+  different-product and rejection behavior, zero product-action lead
+  diversion, zero ungrounded fallback text, and zero currency or amount
+  contradictions between product-bearing prose and trusted structured
+  products/cards.
 
 ## Acceptance Criteria
 
@@ -309,6 +372,22 @@ an order or complete a purchase.
   journeys pass for the normal flow and every applicable negative, concurrency,
   accessibility, isolation, rate/quota, and lifecycle case listed in
   `CPS-021`.
+* Clear default-order and sorted-order natural references consistently use the
+  state-specific typed selection path. An ambiguous `that one` asks which
+  visible product is meant; agreement without pending state asks the shopper to
+  select first; a different-product request asks which current alternative is
+  intended; and rejection confirms that the applicable product was not added.
+* A product-action turn with trusted visible or pending context never opens
+  lead capture or falls through to unrelated prose. Invalid or uncertain model
+  output produces only a grounded, state-appropriate, fail-closed next step.
+* Product-bearing assistant prose never shows a price amount or currency that
+  differs from its trusted structured product/card facts; foreign currency
+  substitution is blocked or replaced by a trusted fallback in every supported
+  conversation language.
+* Fresh QA evidence includes ten distinct clean-session, first-run
+  conversations with all first attempts preserved and zero semantic,
+  lead-diversion, ungrounded-fallback, amount, or currency contradictions, in
+  addition to the full F16 browser matrix and Reviewer approval.
 
 ## Risks / Open Questions
 
@@ -322,9 +401,10 @@ an order or complete a purchase.
   privacy, and context-window risk. Architecture must preserve full
   shopper-visible session continuity while bounding model context without
   allowing summaries to become authority for product identity.
-* No CEO decision is currently required. Architecture must choose the smallest
-  secure persistence and structured-action design compatible with existing
-  F08/F09/F16 boundaries.
+* No CEO decision is currently required. `CC-004` authorizes only exceptional
+  repair cycle `3/3` for `F16-CPS-QA-003` and `F16-CPS-QA-004`. Architecture
+  must choose the smallest secure state-specific contract and trusted prose
+  grounding design compatible with existing F08/F09/F16 boundaries.
 
 ## Status
 
