@@ -310,6 +310,156 @@ expiry/concurrent customer-visible recovery plus the shared
 search/cart/lead/build regression set. The application failed closed during
 model nondeterminism observed in this repair.
 
+## Attempt 3
+
+### Repair Count
+
+`2/2`
+
+### Reviewer Findings
+
+* `F16-CPS-REV-001` — `FIXED_PENDING_VERIFICATION`
+* `F16-CPS-REV-002` — `FIXED_PENDING_VERIFICATION`
+
+### Summary
+
+Made all product writers of `widget_sessions.cart_state` participate in one
+service-role-only atomic boundary. Ordinary cart mutations now reload and
+reapply after a compare-and-swap loss, and Flask offer, submitted-cart,
+display, pending, rejection, and continuation transitions use the same RPC.
+No blind product-code `cart_state` update remains.
+
+Expired confirmation authority and terminal compare-and-swap exhaustion now
+atomically merge one bounded `cart_tool_result.v1` receipt into the latest
+session state. Next returns HTTP 200 with the typed result, the widget invokes
+the existing internal continuation, and Flask composes a localized,
+customer-safe retry/reselection message from trusted product facts and the
+typed `select_product_again` next step. The model still cannot choose products,
+prices, stock, authority, or mutations.
+
+### Files Changed
+
+Product:
+
+* `app/api/widget/cart/route.ts`
+* `backend/api.py`
+* `backend/engine.py`
+* `supabase/migrations/20260730143000_f16_widget_cart_state_atomicity.sql`
+
+Focused tests/support:
+
+* `tests/e2e/conversational-product-selection.spec.ts`
+* `tests/e2e/support/staging-inventory.ts`
+* `tests/f16/cart-concurrency.test.ts`
+* `tests/f16/migration-cart-sales-flow.test.ts`
+* `tests/f16/product-selection.test.ts`
+* `tests/test_f16_product_selection.py`
+
+### Atomicity and Recovery Details
+
+* Added `compare_and_swap_widget_cart_state`, which updates only when owner,
+  session, and the complete expected JSONB state match.
+* Added `record_widget_cart_terminal_result`, which locks the latest session
+  row, deduplicates by confirmation hash, retains only eight receipts, clears
+  only the matching pending authority, and preserves any newer concurrent
+  display/pending selection.
+* Revoked both functions from `PUBLIC`, `anon`, and `authenticated`; granted
+  execution only to `service_role`.
+* Next `add`, `add_build`, `remove`, `quantity`, and `clear` now perform bounded
+  reload/reapply/CAS. `get` is read-only.
+* Flask offer registration precomputes opaque offer tokens, merges them into
+  each freshly loaded state, and removes unpersisted tokens from the response
+  if bounded CAS exhausts.
+* Flask submitted-cart marking reloads and reapplies its marker through CAS.
+  History and build state remain separate-column updates and cannot overwrite
+  cart state.
+* Replayed terminal results return the already persisted outcome, preserving
+  exactly-once behavior when an identical confirmation wins concurrently.
+
+### Migration
+
+Local migration:
+
+`20260730143000_f16_widget_cart_state_atomicity.sql`
+
+SHA-256:
+
+`57bbac77efc21332d8a3734c7d471d5ffb2e62a2ee92aaf635fbb5c62cf3ea66`
+
+Applied to the verified staging project through the staging Supabase MCP:
+
+* Migration name: `f16_widget_cart_state_atomicity`
+* Staging migration version: `20260730093327`
+* Permission verification: `service_role=true`, `authenticated=false`,
+  `anon=false` for both functions.
+* Post-migration security/performance advisors reported only pre-existing
+  project notices; neither new function produced an advisor finding.
+
+Recovery is to deploy the product commit and migration together. A rollback
+must first return all application writers to the former implementation, then
+drop `public.record_widget_cart_terminal_result(...)` and
+`public.compare_and_swap_widget_cart_state(...)`. The migration does not
+rewrite existing cart data.
+
+### Deterministic Verification
+
+* Affected Python suites:
+  * Passed: 31 tests.
+* `pnpm vitest run tests/f16`:
+  * Passed: 7 files, 30 tests.
+* `pnpm exec tsc --noEmit`:
+  * Passed.
+* `git diff --check` and pre-commit `git diff --cached --check`:
+  * Passed.
+* New deterministic cases prove:
+  * an ordinary add loses CAS to a confirmation, reloads, and preserves both
+    cart effects and the consumed receipt without restoring pending authority;
+  * offer registration loses CAS to a rejection/result, reloads, preserves the
+    cleared pending state and receipt, and registers only persisted tokens;
+  * an expired confirmation persists and returns a typed `expired` result;
+  * three confirmation CAS losses produce one atomic typed `conflict` result;
+  * an expired receipt reaches the Flask localized continuation and persists
+    the assistant recovery message.
+* Exhaustive product-code search found no direct `cart_state` update outside
+  the shared RPC boundary.
+
+### Staging Playwright
+
+* Primary conversational selection scenario:
+  * Passed 1/1 in 2.7 minutes after the staging migration and backend restart.
+  * Covered displayed-order selection, confirmation, confirmed CAS add, cart
+    open/focus, replay idempotency, forged/cross-session rejection, and preview
+    session protection.
+* Deterministic expired-recovery widget scenario:
+  * Passed 1/1 in 10.5 seconds.
+  * Exercised real Next terminal receipt persistence, real Flask continuation,
+    visible safe recovery copy, and a closed/empty cart.
+* Shared ordinary-cart scenario:
+  * Two synthetic offers were registered and added through the new CAS RPC and
+    both cart lines rendered.
+  * The scenario then stopped because the model did not find the unrelated
+    third synthetic Monitor fixture. No cart-state or RPC failure occurred.
+* Cleanup verification:
+  * Zero temporary `QA F16 %` inventory rows.
+  * Zero localhost allowed-host rows.
+
+### Git Checkpoint
+
+Product commit:
+
+`c94257db198ef1cf9b4a5b16d504f775f46da52d`
+
+Commit message:
+
+`fix(f16): make cart state transitions atomic`
+
+Generated/runtime files in `backend/**/__pycache__/*.pyc` and
+`tests/e2e/qa-storage-state.json` remain uncommitted and excluded.
+
+### Blockers
+
+None for independent QA and Reviewer re-evaluation.
+
 ## Status
 
 STATUS: IMPLEMENTATION_COMPLETE
