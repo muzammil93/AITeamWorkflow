@@ -294,3 +294,63 @@ new product repair.
 Attempt Result: CHANGES_REQUIRED
 
 STATUS: CHANGES_REQUIRED
+
+## Attempt 3 — CC-005 Routing-Boundary Re-evaluation
+
+### Scope and Evidence
+
+Reviewer independently re-evaluated only `F16-CPS-REV-003` after the
+CEO-authorized `CC-005` repair at product checkpoint
+`22b84fa fix(f16): gate generic routing after product actions`. This review
+did not modify product code, QA evidence, implementation evidence, or
+release-state artifacts.
+
+Direct handoffs reviewed were the F16 PRD and architecture, Developer
+checkpoint/report `453c294`, and fresh QA PASS `b36dd91`. The prior
+`CHANGES_REQUIRED` disposition remains preserved above as historical evidence.
+
+Independent verification:
+
+* `backend/api.py` derives the expected trusted state, calls the dedicated
+  `product_action.v2` interpreter, and validates its output before any
+  web-widget generic routing decision.
+* Invalid dedicated output becomes the existing server-owned fail-closed
+  clarification. The interpreter itself returns a typed clarification on its
+  parse/adjudication failure paths, so those paths do not release the generic
+  router.
+* `_run_general_router_if_released(...)` is the only generic-router call site
+  reachable for a web-widget dedicated product result. It invokes
+  `engine.process_message(...)` only when the already validated action is
+  exactly `no_action/not_product_action`.
+* `validate_product_action_v2(...)` constrains that release outcome to the
+  expected trusted state/action/reason contract. Select, confirm, reject,
+  different-product, ambiguity, no-pending, malformed, and uncertain cases
+  cannot satisfy the release condition and continue through trusted
+  product-response handling instead.
+* The request path still sets product actions to `product_selection` before
+  downstream response handling. Cart mutation remains limited to the existing
+  server-issued confirmation and trusted Next endpoint; the generic/lead
+  router cannot run first on a product turn.
+* Reviewer reran:
+  `PYTHONDONTWRITEBYTECODE=1 venv/bin/python -m unittest tests.test_f16_product_selection tests.test_f16_product_prose tests.test_f16_processing_status`
+  — `PASS` (`48` tests); and `pnpm exec tsc --noEmit` plus
+  `git diff --check 22b84fa^ 22b84fa` — `PASS`.
+
+QA's fresh isolated staging acceptance additionally passed the ten clean,
+first-run conversations at this same checkpoint. Its focused router spies
+cover select, ambiguous, uncertain, confirm, reject, different-product,
+no-pending, valid explicit non-product, and malformed no-action outcomes.
+
+### Disposition
+
+`F16-CPS-REV-003` is `CLOSED`. The repaired ordering satisfies the
+architecture's no-fallthrough boundary: only a validated explicit
+non-product outcome reaches general/lead routing. It preserves the LLM-first
+semantic interpretation contract while keeping product identity, pending
+state, cart authority, and lead authority in their established trusted paths.
+
+No new Reviewer finding is required for this bounded re-evaluation.
+
+Attempt Result: APPROVED
+
+STATUS: APPROVED
