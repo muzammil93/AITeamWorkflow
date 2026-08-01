@@ -96,7 +96,7 @@ interleaving remains possible.
 
 ### `F16-CPS-REV-001` — Shared cart-state writers can overwrite consumed or cleared selection state
 
-Severity: `HIGH`  
+Severity: `HIGH`
 Requirements: `CPS-003`, `CPS-009`, `CPS-012`, `CPS-016`, `CPS-018`
 
 `confirmSelectionAdd` correctly saves its cart mutation, consumed confirmation
@@ -138,7 +138,7 @@ Finding State: `OPEN`
 
 ### `F16-CPS-REV-002` — Expiry and exhausted-CAS paths bypass typed localized recovery
 
-Severity: `MEDIUM`  
+Severity: `MEDIUM`
 Requirements: `CPS-002`, `CPS-011`, `CPS-013`, `CPS-017`, `CPS-021`
 
 The approved architecture requires Next to persist a trusted receipt and return
@@ -245,7 +245,7 @@ currency, and locale behaviour.
 
 #### `F16-CPS-REV-003` — Product actions still execute the general/lead router before their trusted result is applied
 
-Severity: `HIGH`  
+Severity: `HIGH`
 Requirements: `CPS-002`, `CPS-018`, `CPS-024`, `CPS-026`
 
 `backend/api.py` correctly calls `interpret_product_action(...)` first, but it
