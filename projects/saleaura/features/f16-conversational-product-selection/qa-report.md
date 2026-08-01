@@ -171,7 +171,7 @@ The committed test evidence does not cover the complete required matrix:
 
 ### `F16-CPS-QA-001` — Required customer-visible coverage matrix is incomplete
 
-Severity: `HIGH`  
+Severity: `HIGH`
 Requirements: `CPS-003`, `CPS-005`, `CPS-007`, `CPS-009`, `CPS-011`,
 `CPS-014`, `CPS-015`, `CPS-017`, `CPS-020`, `CPS-021`
 
@@ -906,3 +906,74 @@ The earlier failed attempts remain recorded above and were not overwritten.
 Route the checkpoint to independent Reviewer evaluation.
 
 STATUS: PASS
+
+## Attempt 5 — CC-005 Routing-Boundary QA
+
+### Scope and checkpoint
+
+QA evaluated the CEO-authorized final routing-boundary repair at product
+checkpoint `22b84fa fix(f16): gate generic routing after product actions`.
+QA did not modify product code, release/review/implementation artifacts, or
+rerun the one-shot staging audit.
+
+### Focused deterministic routing evidence
+
+Current code makes the general router reachable only through a validated
+`product_action.v2` result with `action=no_action` and
+`reason=not_product_action`. The focused test coverage at
+`tests/test_f16_product_selection.py:1610` proves that the generic router is
+not called for select, ambiguous, uncertain, confirm, reject,
+different-product, or no-pending product outcomes; a valid explicit
+non-product result is routed to the generic handler; and malformed no-action
+data cannot release it.
+
+Command:
+
+`PYTHONDONTWRITEBYTECODE=1 venv/bin/python -m unittest tests.test_f16_product_selection`
+
+Result: `PASS` — 33 tests, including the three focused routing-boundary tests.
+
+### Retained one-shot staging evidence
+
+The retained isolated audit at
+`/private/tmp/f16-qa-final-22b84fa-corrected` is not a passing acceptance
+run. Its preserved `.last-run.json` records `status: failed`. Its Playwright
+trace records that widget bootstrap returned HTTP `503` before the widget
+could load; the test then ended while waiting for its first bootstrap response.
+No chat conversation, assistant reply, product selection, cart action, or
+customer-visible router outcome was evaluated in that run.
+
+This is an environment/bootstrap failure, not evidence of a routing defect in
+the `22b84fa` code. It nevertheless cannot certify the required real staging
+customer outcome or replace the one-shot audit. The earlier `39edc8a` audit
+remains historical evidence only because CC-005 changes the request-routing
+boundary under test.
+
+### Finding
+
+#### `F16-CPS-QA-005` — CC-005 staging acceptance run did not reach the widget
+
+Severity: `HIGH`
+Requirements: `CPS-002`, `CPS-018`, `CPS-021`
+
+The retained one-shot CC-005 staging run failed at widget bootstrap with HTTP
+`503`, before a conversation could be exercised. Automated unit coverage
+supports the routing gate, but it does not prove that the real staging
+bootstrap/chat path applies that gate correctly. A correctly configured
+fresh staging run is required, preserving its first output and avoiding a
+retry of this failed run.
+
+Finding State: `OPEN`
+
+### Attempt 5 verdict
+
+The routing-boundary unit tests pass. The retained one-shot staging audit
+failed before product behavior was exercised, so QA cannot certify CC-005 for
+release. Preserve this environmental acceptance failure and route the
+checkpoint to a fresh, correctly configured staging QA run before Reviewer
+re-evaluation.
+
+Attempt Result: FAIL — staging acceptance evidence unavailable after bootstrap
+HTTP `503`.
+
+STATUS: FAIL
