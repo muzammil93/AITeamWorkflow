@@ -976,4 +976,90 @@ re-evaluation.
 Attempt Result: FAIL — staging acceptance evidence unavailable after bootstrap
 HTTP `503`.
 
-STATUS: FAIL
+## Attempt 6 — CC-005 Valid Isolated Staging Acceptance
+
+### Scope and environment
+
+QA evaluated the CEO-authorized CC-005 routing-boundary repair at product
+checkpoint `22b84fa fix(f16): gate generic routing after product actions`.
+The isolated services were confirmed healthy immediately before the valid run:
+backend `http://127.0.0.1:8001/health` returned `200`, and frontend
+`http://localhost:5002` responded successfully. The CEO-owned services on
+ports `8000` and `5001` were not touched. QA used the saved dedicated staging
+owner state and the authorized non-production Supabase configuration.
+
+Attempt 5 remains an environmental, non-acceptance record: its HTTP `503`
+occurred before widget bootstrap and before any conversation. It is not
+relabelled as a passing run.
+
+### Focused routing boundary
+
+Command:
+
+`PYTHONDONTWRITEBYTECODE=1 venv/bin/python -m unittest tests.test_f16_product_selection.ProductActionRoutingBoundaryTests`
+
+Result: `PASS` — 3/3 tests. The generic router was not called for select,
+ambiguous, uncertain, confirm, reject, different-product, or no-pending
+product outcomes. It ran only for the validated explicit
+`no_action/not_product_action` outcome; malformed no-action data did not
+release it.
+
+### One-shot staging ten-conversation audit
+
+The first invocation selected an unsupported Node 18.2 runtime and exited
+before Playwright launched; it opened no browser or widget and sent no chat
+turn. QA then selected the project's Node 22.13.1 runtime and ran the one
+actual audit once, with Playwright retries disabled:
+
+```text
+E2E_INVENTORY=1 E2E_TARGET=staging
+E2E_QA_USER_ID=7a2cb1fb-475b-4f4d-af58-7e1497e01cb2
+E2E_STORAGE_STATE=tests/e2e/qa-storage-state.json
+E2E_BASE_URL=http://localhost:5002 E2E_F16_TEN_CHAT_AUDIT=1
+pnpm exec playwright test --config=playwright.staging.config.ts \
+  tests/e2e/conversational-product-selection.spec.ts \
+  --project=desktop-chromium --workers=1 --reporter=list \
+  --grep 'CPS cycle-3 audit'
+```
+
+Result: `PASS` — one test, all ten clean first-run conversations. The result
+metadata is `/private/tmp/saleaura-f16-cc005.7Z3mKL/test-results/staging-e2e/.last-run.json`
+(`status: passed`, no failed tests). The retained browser recordings comprise
+the ten clean sessions under the matching `conversational-product-sel-*`
+result directory.
+
+### First-response review
+
+QA reviewed the audit's first-response content assertions and retained browser
+recordings. The expected customer-facing result passed for every conversation:
+
+* default and sorted visible ordinals named the trusted card product, included
+  quantity one and the PKR price before consent, and left the cart unchanged;
+* a different-product turn requested a new visible choice rather than
+  confirming the prior pending item;
+* unanchored `that one` clarified without adding anything, and no-pending
+  agreement said no product was waiting without internal candidate wording;
+* cancellation named the declined product and added nothing;
+* fresh repeated selections remained card/PKR grounded;
+* discovery prose and cards used PKR with no foreign-currency marker; and
+* Urdu ordinal selection remained grounded, while the Roman-Urdu cancellation
+  retained the selected name and honoured the switch back to English.
+
+This valid run reached real widget bootstrap and chat, unlike Attempt 5. The
+test's `finally` cleanup completed because the test passed; no migration,
+production, billing, payment, subscription, or deployment action occurred.
+
+### CC-005 finding resolution
+
+`F16-CPS-QA-005` — `CLOSED_BY_ATTEMPT_6`. Real staging customer-visible
+evidence now confirms the routing boundary alongside the focused gate tests.
+
+### Attempt 6 verdict
+
+CC-005 passes independent QA. Preserve all earlier failed and invalid attempts
+as historical evidence; route this checkpoint to independent Reviewer
+re-evaluation.
+
+Attempt Result: PASS
+
+STATUS: PASS
