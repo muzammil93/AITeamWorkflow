@@ -4,7 +4,7 @@
 
 Release ID: `SALEAURA-V1`
 
-Plan version: `1.0`
+Plan version: `1.4`
 
 Plan state: CEO approved
 
@@ -43,7 +43,7 @@ The following must not be introduced by any feature:
 * Customer-facing WhatsApp chat.
 * Visible voice input or text-to-speech.
 * Non-PC retail positioning.
-* Office/integrated-graphics verified builds, peripherals, monitors, operating systems, multi-GPU, custom water loops, or advanced multi-storage/multi-RAM-kit optimization.
+* Office/integrated-graphics verified builds, operating systems, multi-GPU, custom water loops, or advanced multi-storage/multi-RAM-kit optimization. Peripherals and monitors remain excluded from verified builds, except that F16 may search, display, and add an owner's active in-stock peripheral/monitor inventory to the non-reserving cart-to-lead inquiry.
 * Scheduled Google Sheets sync.
 * More than one active spreadsheet/worksheet per owner.
 * Owner-entered performance scores or runtime benchmark scraping.
@@ -69,7 +69,8 @@ The following must not be introduced by any feature:
 | F12 | Lead Capture and Owner Notifications | QA_FIRST | F02, F08, F11 | Critical | M3 |
 | F13 | Owner Dashboard | QA_FIRST | F02, F03, F08, F12 | High | M4 |
 | F14 | Public Website and Product Positioning | QA_FIRST | F02, F09, F10, F11, F12, F13 | Medium | M4 |
-| F15 | Integrated Production-Readiness Gate | QA_FIRST | F00, F01, F02, F03, F04, F05, F06, F07, F08, F09, F10, F11, F12, F13, F14 | Critical | M4 |
+| F16 | Chat Widget Sales Flow | QA_FIRST | F02, F03, F08, F09, F10, F11, F12, F13 | Critical | M4 |
+| F15 | Integrated Production-Readiness Gate | QA_FIRST | F00, F01, F02, F03, F04, F05, F06, F07, F08, F09, F10, F11, F12, F13, F14, F16 | Critical | M4 |
 
 ## Requirement Ownership
 
@@ -254,6 +255,25 @@ Each requirement has exactly one primary feature. Regression features may revali
 
 F15 is a validation gate, not a backlog for unfinished work. Findings must be routed to their primary feature owner. F15 implementation is permitted only for a genuinely integration-only defect covered by an approved delta PRD and architecture.
 
+### F16 — Chat Widget Sales Flow
+
+* `CART-001`: Render the saved owner greeting in the live public widget, not only in owner preview.
+* `CART-002`: Present truthful customer-safe product cards and only products from the session owner that were active and in stock when offered.
+* `CART-003`: Let a shopper add an offered product to a private cart, view the cart, remove an item, and continue shopping.
+* `CART-004`: Persist cart lines as trusted owner/session-bound product snapshots; never accept browser-supplied price, owner, or raw inventory identity as authority.
+* `CART-005`: Do not reserve inventory, decrement stock, create an order, or revalidate stock merely because a lead is submitted. The final cart is an inquiry snapshot, not a purchase guarantee.
+* `CART-006`: Show the final cart and request contact details only after the shopper explicitly expresses buying intent from that cart.
+* `CART-007`: Save one idempotent, owner-scoped lead with the final cart context, required contact fields, and explicit consent before notifications.
+* `CART-008`: Keep the cart and lead flow usable on desktop and mobile, including empty, remove, cancel, unauthorized, expired-session, and save-failure states.
+* `CART-009`: Preserve search, comparison, existing lead capture, owner/session isolation, quota, notification-preservation, and deterministic F10/F11 safety regression coverage.
+* `CART-010`: Keep cart controls, item names, quantities, prices, remove actions, build-inclusion notice, final-cart intent action, and lead form reachable and readable on desktop and mobile.
+* `CART-011`: Expand an explicitly selected trusted F10/F11 build snapshot into individual cart products without silently changing cart contents after a later build modification.
+* `CART-012`: Default quantity from a confident chat request, otherwise one; allow only bounded positive customer-editable quantities and retain the final quantities in cart totals and lead context.
+* `CART-013`: Let a customer explicitly update a submitted request after cart changes, creating a history version on the same lead without consuming an additional lead quota.
+* `CART-014`: Include contacts, cart items, quantities, price/currency, totals, consent/source facts, and request history in owner notifications and owner-scoped Dashboard lead details.
+
+F16 does not redefine F10 verified-build generation or F11 build-modification rules. It includes only their approved customer-card/cart integration boundary: an explicitly selected protected build snapshot may be expanded into individual cart products, while a later modified build never changes cart contents automatically. F16 excludes customer checkout, payment collection, order creation, stock reservation, fulfilment, shipping, and live internet product research.
+
 ## Feature Gate
 
 A feature unlocks dependents only when:
@@ -275,7 +295,7 @@ A feature unlocks dependents only when:
 | M1 | Platform Foundation | F00–F02 | CEO review |
 | M2 | Catalog and Inventory | F03–F07 | CEO review |
 | M3 | Customer Intelligence | F08–F12 | CEO review |
-| M4 | Owner and Launch Readiness | F13–F15 | Final CEO review |
+| M4 | Owner and Launch Readiness | F13, F14, F16, F15 | Final CEO review |
 
 ## Environment and Promotion Rules
 
@@ -301,7 +321,50 @@ Stop for:
 
 ## Change Control
 
-No changes recorded.
+### CC-001 — CEO-approved Chat Widget cart-to-lead scope
+
+* **Request:** Finalise the production-ready ChatWidget. Add an editable-quantity customer cart that supports individual products, generated-build component products, removal, lead-request updates, owner notification cart details, and Dashboard lead details; create a lead only after explicit buying intent.
+* **Reason:** The current widget can search inventory, generate/modify builds, and capture leads, but it cannot retain selected products, turn a selected build into individual cart products, show a final cart, attach cart/request history to a lead, or let an owner view the full request.
+* **Affected requirements/features:** New F16 requirements `CART-001` through `CART-014`; regression coverage for F08 through F13 and F15. F10/F11 build behavior is included only at the customer-card/cart integration boundary; deterministic generation and modification safety remain governed by their approved requirements.
+* **Dependency/milestone impact:** Adds F16 to M4 and makes F15's final production-readiness gate depend on F16. No production deployment, Supabase production mutation, or Polar action is authorized.
+* **Scope boundary:** This is a cart-to-lead inquiry only. It does not override the locked exclusion of customer checkout, ordering, fulfilment, shipping, or store-product payment processing. It creates the narrow approved exception for F16 to sell existing owner-inventory peripherals and monitors as inquiry cart lines; it does not add them to verified builds. It does not reserve/decrement stock or perform a lead-time stock revalidation.
+* **CEO decision and date:** Approved in the active Codex thread, 2026-07-26 (Asia/Karachi).
+
+### CC-002 — CEO-approved backend-driven chat processing statuses
+
+* **Request:** Replace the ChatWidget typing indicator's timer-rotated hardcoded phrases with truthful, ephemeral processing statuses emitted only while the backend is genuinely executing the corresponding work. Keep the Send-button spinner unchanged.
+* **Reason:** The current frontend cycles through `Analyzing request`, `Searching inventory`, and `Preparing response` every 1.2 seconds regardless of the actual backend stage, which can mislead shoppers.
+* **Affected requirements/features:** Adds the approval-gated F16 delta requirements `CHAT-STATUS-001` through `CHAT-STATUS-012` defined in `features/f16-chat-processing-statuses-proposal/prd.md`, with architecture in the adjacent `architecture.md`. Requires regression coverage for F08–F12 and existing F16 chat/cart behavior.
+* **Dependency/milestone impact:** Remains inside active F16 and does not change the feature dependency order or milestone membership. F15 remains dependent on F16 completion.
+* **Scope boundary:** Preserve the existing Send-button spinner, JSON consumers, search/comparison/build/cart/lead behavior, authorization, quota, and persistence. No database migration, external service, package, deployment, production mutation, simulated progress, timer rotation, polling, or WebSocket infrastructure is authorized.
+* **CEO decision and date:** Approved in the active Codex thread with `Approved—implement the F16 status proposal.`, 2026-07-29 (Asia/Karachi).
+
+### CC-003 — CEO-approved conversational product selection and confirmation
+
+* **Request:** Let a shopper refer naturally to products in the active visible chat row, have the LLM return a typed semantic selection/confirmation action without a static phrase catalogue, confirm the exact trusted product, then revalidate and add it exactly once to the existing private cart and open that cart.
+* **Reason:** Visible owner-preview testing showed that `can i have the first one?` was not grounded to the first displayed card, the assistant skipped product-specific confirmation, and lead capture opened instead of the cart. The existing text-only model window also does not preserve authoritative displayed order or pending selection state.
+* **Affected requirements/features:** Adds F16 delta requirements `CPS-001` through `CPS-021` in `features/f16-conversational-product-selection/prd.md`, with architecture in the adjacent `architecture.md`. Requires regression coverage for F08, F09, F12, existing F16 product/cart/lead behavior, and the completed chat-status delta.
+* **Dependency/milestone impact:** Remains inside active F16 and does not change feature order or milestone membership. Parent F16 QA and F15 remain gated until this approved delta completes.
+* **Scope boundary:** The LLM interprets and responds through a versioned structured-action/tool-result contract; trusted code alone validates visible order, owner/session offers, pending confirmation, inventory/price/stock, idempotency, and cart mutation. No static intent phrase catalogue, search-ranking change, lead redesign, checkout/order/payment/reservation behavior, database migration, external service, deployment, or production mutation is authorized.
+* **CEO decision and date:** Approved in the active Codex thread through `This is exactly what I was thinking... Review your plan now and fix the issue`, 2026-07-30 (Asia/Karachi).
+
+### CC-004 — CEO-approved exceptional F16 repair cycle and prose-currency scope
+
+* **Request:** Authorize one exceptional third F16 repair cycle for the two High findings from the dedicated 10-conversation assistant-response audit, and include assistant prose currency grounding within F16.
+* **Reason:** After the normal repair allowance reached `2/2`, first-run staging conversations still diverted natural visible-product references to lead capture, guessed ambiguous references, produced ungrounded no-pending recovery text, and rendered foreign currency symbols in prose while trusted cards showed PKR.
+* **Affected requirements/features:** Reopens only F16 conversational-selection requirements `CPS-001` through `CPS-021` for `F16-CPS-QA-003` and `F16-CPS-QA-004`. It explicitly brings product-bearing assistant prose currency equality with trusted structured cards into F16 acceptance scope.
+* **Dependency/milestone impact:** F16 and dependent F15 remain blocked until the exceptional repair passes a fresh full QA matrix, a clean 10-conversation first-run audit, and Reviewer approval. The authorized repair count becomes `3/3` for this delta only.
+* **Scope boundary:** Preserve LLM semantic understanding without a static phrase catalogue. Use state-specific typed action contracts, deterministic validation/fail-closed clarification, and trusted currency validation/fallback. Do not redesign search ranking, cart authority, lead workflow, checkout, billing, deployment, or production data.
+* **CEO decision and date:** Explicitly approved in the active Codex thread with `Yes approved from my side`, 2026-07-30 (Asia/Karachi).
+
+### CC-005 — CEO-approved final F16 routing-boundary repair
+
+* **Request:** Fix only Reviewer finding `F16-CPS-REV-003` by preventing the generic/general/lead router from running before a trusted product-action outcome is applied.
+* **Reason:** Independent QA passed the exceptional 3/3 repair, but final review found that the existing control flow still invokes generic routing too early. This violates the approved no-fallthrough boundary even though no unsafe cart or lead mutation was observed.
+* **Affected requirements/features:** Existing F16 `CPS-001` through `CPS-021`, specifically the architecture-required product-action-first routing boundary. This authorizes one final repair and proportionate QA/Reviewer re-evaluation for `F16-CPS-REV-003` only.
+* **Dependency/milestone impact:** F16 and dependent F15 remain blocked until the finding passes fresh targeted QA and Reviewer approval. No other feature order or milestone changes.
+* **Scope boundary:** Gate/reorder the existing trusted routing path only. Do not redesign the LLM contract, static phrase matching, cart authority, lead workflow, search behavior, schema/migration, billing, deployment, or production data.
+* **CEO decision and date:** Explicitly approved in the active Codex thread with `You have my approval. Fix it`, 2026-08-01 (Asia/Karachi).
 
 Future changes must include:
 

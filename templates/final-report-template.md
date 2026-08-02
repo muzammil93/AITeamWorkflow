@@ -1,5 +1,18 @@
 # Final Report
 
+## Handoff Metadata
+
+Handoff Contract: `v1`
+Feature Key: `TBD`
+Change Package: `BASE` or `TBD-CC000`
+Attempt: `1`
+Outcome: `TBD`
+Disposition: `TBD`
+Next Route: `TBD`
+Requirement IDs: `TBD`
+Evidence IDs: `TBD`
+Input Revisions: `review-report.md@TBD; qa-report.md@TBD`
+
 ## Feature ID and Name
 
 TBD
@@ -43,6 +56,14 @@ TBD or `None`
 ## Git State
 
 TBD
+
+### Reviewed Commit
+
+TBD or `NOT_APPLICABLE`
+
+### Integrated Commit
+
+TBD, `NOT_INTEGRATED`, or `NOT_APPLICABLE`
 
 ## Database State
 

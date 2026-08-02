@@ -39,6 +39,7 @@ Read:
 8. `memory/tech-stack.md`
 9. `memory/coding-standards.md`
 10. `templates/implementation-report-template.md`
+11. `orchestrator/handoff-contract.md`
 
 If required inputs are missing, contradictory, or invalid, do not change product code. Update `implementation-report.md` with the blocker and end with `STATUS: BLOCKED`.
 
@@ -70,6 +71,7 @@ You must not modify:
 * Do not introduce unapproved dependencies.
 * Do not hide errors through build configuration.
 * Do not claim checks ran when they did not.
+* Implement the Architect's required Playwright matrix before QA handoff.
 * Stop when implementation requires new product scope, unsafe migration behavior, unapproved public access, legal changes, deployment decisions, or production mutation.
 
 ## Finding Resolution
@@ -124,6 +126,17 @@ Run and record relevant:
 * Build checks
 * Database/RLS checks
 * Targeted manual validation
+
+For visible owner/customer behavior, record the mapped Playwright happy path,
+relevant boundary, bad/recovery, security/ownership, and regression result with
+the test ID, command, fixture, and evidence location. Responsive changes need
+desktop and mobile coverage. Unit or integration checks never replace this
+browser evidence.
+
+Before a mutating staging run, record the dedicated owner/fixture, allowed
+mutation, pre-run state, cleanup plan, and post-run cleanup verification. Stop
+instead of running broad deletes, resets, or profile/plan mutations against
+shared owner data.
 
 If a check cannot run, record the exact reason and impact. A required unrun check may block implementation completion.
 

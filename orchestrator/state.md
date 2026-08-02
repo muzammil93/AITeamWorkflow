@@ -32,7 +32,7 @@ Capabilities:
 
 * `QUEUED`
 * `BLOCKED_DEPENDENCY`
-* `CEO_REQUEST_CREATED`
+* `CEO_REQUEST_RECORDED`
 
 ### Existing-Code Verification
 
@@ -82,6 +82,7 @@ Code state does not imply deployment.
 * `LOCAL_VALIDATED`
 * `STAGING_APPLIED`
 * `STAGING_VERIFIED`
+* `STAGING_VALIDATED` (legacy alias; reconcile to `STAGING_VERIFIED`)
 * `PRODUCTION_NOT_APPLIED`
 * `PRODUCTION_APPLIED`
 
@@ -111,7 +112,7 @@ Code state does not imply deployment.
 ## Standard Transition
 
 `QUEUED`
-→ `CEO_REQUEST_CREATED`
+→ `CEO_REQUEST_RECORDED`
 → `PRODUCT_MANAGER_RUNNING`
 → `PRD_READY`
 → `ARCHITECT_RUNNING`
@@ -127,7 +128,7 @@ Code state does not imply deployment.
 ## Existing-Code Pass Transition
 
 `QUEUED`
-→ `CEO_REQUEST_CREATED`
+→ `CEO_REQUEST_RECORDED`
 → `EXISTING_QA_RUNNING`
 → `QA_PASS`
 → `EXISTING_REVIEW_RUNNING`
@@ -177,6 +178,11 @@ When another repair is required after count 2:
 
 → `REPAIR_LIMIT_REACHED`
 
+CEO-approved repair exceptions are not new default states. The release-plan
+change-control record names the package, finding IDs, revised budget, expiry,
+and required fresh QA/Reviewer path. Release state records normal and
+exceptional budgets separately.
+
 ## Final Report Transition
 
 After `REVIEW_APPROVED`:
@@ -200,6 +206,9 @@ Before and after each transition, compare:
 * Repair count
 * Git state when applicable
 * Migration file checksum and recorded database history when applicable
+* Handoff-contract outcome, disposition, route, inputs, and evidence IDs for
+  artifacts created or materially updated under contract `v1`
+* Parent/child change-package completion before a parent feature unlocks
 
 Any unexplained mismatch transitions to:
 

@@ -19,6 +19,10 @@ The release state is mutable and may be updated only by the Orchestrator.
 
 No product feature may start until the release plan records CEO approval and release-state setup blockers for that feature are resolved.
 
+All routing uses `orchestrator/handoff-contract.md`. Historical artifacts are
+mapped during reconciliation and are never rewritten merely to use canonical
+statuses.
+
 ## Feature Folder Modes
 
 ### Standard Implementation Folder
@@ -34,6 +38,12 @@ Contains:
 * `qa-report.md`
 * `review-report.md`
 * `final-report.md`
+
+An approved delta retains the release-plan feature ID as its `Feature Key` and
+uses the immutable change-control reference as its `Change Package`. A child
+package may pass its own QA/review path, but the parent feature unlocks only
+after its required package matrix, QA, review, and final-report evidence are
+aggregated and reconciled.
 
 ### Existing-Code Verification Folder
 
@@ -79,7 +89,7 @@ The Orchestrator may confirm existence through a read-only file/code scan, but m
 Valid transition:
 
 `QUEUED`
-→ `CEO_REQUEST_CREATED`
+→ `CEO_REQUEST_RECORDED`
 → `PRODUCT_MANAGER_RUNNING`
 → `PRD_READY`
 → `ARCHITECT_RUNNING`
@@ -106,7 +116,7 @@ Stop states:
 Valid transition:
 
 `QUEUED`
-→ `CEO_REQUEST_CREATED`
+→ `CEO_REQUEST_RECORDED`
 → `EXISTING_QA_RUNNING`
 
 If QA passes:
@@ -142,7 +152,8 @@ After an implementation attempt:
 
 ### QA Failure
 
-If QA returns `STATUS: FAIL` because the implementation does not satisfy approved requirements:
+If QA returns `STATUS: FAIL` with `Disposition: IMPLEMENTATION_DEFECT` because
+the implementation does not satisfy approved requirements:
 
 1. Record stable finding IDs.
 2. Increment repair count.
@@ -151,7 +162,10 @@ If QA returns `STATUS: FAIL` because the implementation does not satisfy approve
 5. QA reruns all affected requirements and previously passing critical paths.
 6. If QA passes, continue to Reviewer.
 
-Do not consume a repair cycle or route to Developer when QA failure is caused by ambiguous scope, missing CEO authorization, unavailable required external access, destructive-data uncertainty, or another mandatory stop condition. Set the matching stop state instead.
+Do not consume a repair cycle or route to Developer when QA failure has another
+disposition, such as ambiguous scope, missing CEO authorization, unavailable
+required external access, incomplete evidence, destructive-data uncertainty, or
+another mandatory stop condition. Set the matching stop state instead.
 
 ### Reviewer Changes
 
@@ -174,9 +188,18 @@ When a third repair would be required:
 * Stop.
 * Record unresolved finding IDs and required CEO action.
 
+A CEO-approved exception is valid only when release-plan change control records
+the package key, finding IDs, exact scope, revised budget, expiry, and fresh
+QA/Reviewer evidence. Record its use separately from the normal `2/2` budget.
+
 Baseline QA failure before the first implementation does not count as a repair.
 
 ## Agent Inputs and Ownership
+
+Every agent reads `orchestrator/handoff-contract.md` and emits the required
+handoff metadata in its owned artifact. The Orchestrator rejects a new or
+materially updated artifact whose final status, outcome, disposition, route, or
+input/evidence references cannot be reconciled.
 
 ### Product Manager
 
@@ -256,6 +279,12 @@ Allowed statuses:
 
 QA never modifies product code.
 
+QA `PASS` requires the mapped Playwright happy path, relevant boundary,
+bad/recovery, security/ownership, and regression evidence for the exact
+reviewed commit. Desktop and mobile evidence is required for responsive work.
+An unavailable environment or fixture is `FAIL` with a blocking disposition,
+not a custom terminal QA status.
+
 ### Reviewer
 
 Modes:
@@ -308,6 +337,8 @@ The report must distinguish:
 * Remaining non-blocking risks
 * Dependency unlock and milestone outcome
 * CEO or milestone action required
+* Reviewed commit and integrated commit (or `NOT_INTEGRATED`)
+* Required Playwright IDs, outcomes, and approved manual-smoke exceptions
 
 Allowed statuses:
 
@@ -352,12 +383,19 @@ Before and after every transition, verify:
 * Working tree contains no unexplained cross-feature changes.
 * Recorded migration checksum matches the migration file.
 * Recorded staging migration matches database history when database access is available.
+* Handoff-contract metadata is valid for every new or updated artifact.
+* Child change-package evidence is complete before a parent feature unlocks.
 
 If a required check fails:
 
 * Set `STATE_INCONSISTENT`.
 * Record the exact mismatch.
 * Stop without guessing or modifying agent artifacts.
+
+Run `python3 scripts/validate_workflow.py` before recording the transition. The
+default report identifies legacy artifacts; new or updated handoffs must pass
+the contract checks. Use `--strict` only when the selected release has been
+fully migrated from legacy artifact values.
 
 Every successful release-state change must append an immutable transition-log entry with timestamp, actor, previous/new state, evidence, and reason.
 

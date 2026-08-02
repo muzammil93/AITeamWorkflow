@@ -4,15 +4,15 @@
 
 Plan ID: `SALEAURA-E2E-STAGING-001`
 
-Version: `1.2`
+Version: `1.3`
 
-Status: `APPROVED_FOR_IMPLEMENTATION_AND_QA - F07_INVENTORY_REPAIR_PENDING`
+Status: `APPROVED_FOR_IMPLEMENTATION_AND_QA - F16_CART_TO_LEAD_PLANNED`
 
 Environment: Staging application, staging Supabase, and Polar sandbox only.
 
 Production: Explicitly out of scope until separately authorized.
 
-Scope: F01-F14, including the approved F07 Google Sheets inventory follow-up.
+Scope: F01-F16, including the approved F07 Google Sheets inventory follow-up and F16 cart-to-lead scope.
 
 Purpose: Validate the complete experience of a PC-component shop owner and that shop's customers. The browser suite must prove the visible result, the correct owner-scoped result in staging data where appropriate, and safe recovery when something fails.
 
@@ -142,6 +142,16 @@ Google-managed products are always edited or removed in the connected Google She
 | `E2E-021` | Build changes | Cheaper request, CPU/GPU upgrade/downgrade, brand/budget request, alternatives, cancel | Current build remains unchanged until explicit confirm; proposal shows complete customer-safe differences |
 | `E2E-022` | Build confirmation/revalidation | Confirm proposed change after controlled stock/state change, then make a sequential change | Confirmation rechecks stock/compatibility/version; stale proposal is safely rejected; next snapshot is correct |
 
+### Phase 4A - Cart-to-Lead Sales Flow (F16, pre-build integration)
+
+F16 is intentionally product-cart only. It must not change F10 build generation or F11 modification, reserve/decrement stock, create a customer order, or invoke a payment provider.
+
+| Test ID | Journey | Checks | Pass condition |
+| --- | --- | --- | --- |
+| `E2E-033` | Product cart and explicit lead intent | Owner-saved greeting; owner currency; search active CPU, keyboard, and monitor/LCD; add products; chat-derived/default quantity; edit quantity; remove one; continue shopping; empty-cart state; final-cart `I want to buy`; invalid/valid consented contact form | Public greeting/currency match owner configuration; only offered owner products enter the cart; quantities and totals are correct; cart is clear and removable; no lead form before explicit final-cart intent; valid final-cart lead stores trusted cart lines without stock reservation or payment action |
+| `E2E-034` | Cart/session safety and recovery | Forged/replayed/expired offer action; another owner/session attempt; invalid quantity; cart save failure; cancelled lead; duplicate submit; notification failure preservation | No cross-owner product/cart data or cart mutation; quantities are bounded safely; safe recovery messages; cancelled/invalid flows create no lead; one valid lead survives notification failure and remains correctly scoped |
+| `E2E-035` | Build-to-cart, modification, and request update | Generate a verified build; add its components to cart as individual products; expose already-in-build notice; modify build in chat without automatic cart mutation; add/remove intentionally; send initial lead; alter cart; explicitly update request; inspect owner notification and Dashboard lead details | Cart never claims a verified bundle; build components are individual cart products; build modifications never silently alter cart; one lead retains ordered request versions; initial/updated owner notification and Dashboard details contain contacts, cart quantities, currency, totals, consent, and history |
+
 ### Phase 5 - Leads, Notifications, and Owner Dashboard
 
 | Test ID | Journey | Checks | Pass condition |
@@ -160,7 +170,7 @@ Google-managed products are always edited or removed in the connected Google She
 | `E2E-029` | Reactivation | Reactivate sandbox subscription | Eligible activity returns without losing inventory, leads, chats, or existing data |
 | `E2E-030` | Shop isolation | `OWNER-OTHER` and separate customer contexts attempt cross-shop URLs, widget interactions, inventory/chat/lead/billing access | No cross-owner data is visible or mutable |
 | `E2E-031` | Widget/session abuse recovery | Unapproved origin, malformed host, fake/expired session, repeated messages, refresh/retry | Requests fail safely; approved widget remains usable; no secrets or owner IDs appear |
-| `E2E-032` | Mobile regression | Repeat the highest-value profile, billing, CSV preview, widget, search, comparison, build, modification, lead, dashboard flows | No overlap, clipped text, unreachable controls, or broken responsive conversation flow |
+| `E2E-032` | Mobile regression | Repeat the highest-value profile, billing, CSV preview, widget, search, comparison, cart-to-lead, build, modification, lead, dashboard flows | No overlap, clipped text, unreachable controls, or broken responsive conversation flow |
 
 ## Feature Coverage Map
 
@@ -180,14 +190,15 @@ Google-managed products are always edited or removed in the connected Google She
 | F12 Leads/notifications | E2E-023 to E2E-026 |
 | F13 Dashboard | E2E-027, E2E-030, E2E-032 |
 | F14 Public site | E2E-001 |
+| F16 Chat Widget sales flow | E2E-033 to E2E-035, E2E-032 |
 
 ## Run Levels and Gates
 
 | Run | Tests | Trigger | Release rule |
 | --- | --- | --- | --- |
-| Smoke | E2E-000, 001, 004, 009, F07-INV-001, F07-INV-003 to F07-INV-005, 014 to 016, 023 to 025, 027 | Every meaningful staging change | All pass; no Critical/High open finding |
-| Full desktop | E2E-000 to E2E-031 and F07-INV-001 to F07-INV-009 | Feature-complete staging candidate | All in-scope tests pass or have an approved documented blocker |
-| Full mobile | E2E-001, 002, 004, 006, 014 to 027, 032, and F07-INV-010 | Same candidate after desktop pass | All selected tests pass; no responsive Critical/High finding |
+| Smoke | E2E-000, 001, 004, 009, F07-INV-001, F07-INV-003 to F07-INV-005, 014 to 016, 023 to 025, 027, 033, 035 | Every meaningful staging change | All pass; no Critical/High open finding |
+| Full desktop | E2E-000 to E2E-035 and F07-INV-001 to F07-INV-009 | Feature-complete staging candidate | All in-scope tests pass or have an approved documented blocker |
+| Full mobile | E2E-001, 002, 004, 006, 014 to 027, 032 to 035, and F07-INV-010 | Same candidate after desktop pass | All selected tests pass; no responsive Critical/High finding |
 | Re-test | Affected tests plus prerequisite/consumer tests | Developer marks a bug fixed | Fix test passes, regression set passes, original finding is closed with evidence |
 
 ## Defect Severity and Stop Rules

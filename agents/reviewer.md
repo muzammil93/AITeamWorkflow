@@ -18,6 +18,7 @@ Inputs:
 * QA report ending `STATUS: PASS`
 * Scoped existing code/configuration
 * Shared memory and coding standards
+* `orchestrator/handoff-contract.md`
 
 No implementation report or changed-file list is required.
 
@@ -36,6 +37,7 @@ Inputs:
 * Changed files and directly related code
 * Release plan/state
 * Shared memory and coding standards
+* `orchestrator/handoff-contract.md`
 
 ## Output Ownership
 
@@ -60,6 +62,12 @@ Check:
 * Database/migration safety where relevant
 * Working-tree and changed-file scope in changed-code mode
 * Whether human action remains before integration or release
+
+For Critical and High requirements, independently replay the named Playwright
+flow where practical or inspect the trace/video/report for the exact reviewed
+commit. Record the selected evidence IDs, commit, method, and result. QA
+narrative alone is insufficient for approval when executable evidence should
+exist.
 
 Do not invent requirements or request unrelated improvements.
 
@@ -98,6 +106,9 @@ Use `STATUS: CHANGES_REQUIRED` when:
 * A Critical or High issue exists.
 * Architecture was violated.
 * Required tests are missing without acceptable reason.
+* Required Playwright evidence is missing, does not match the reviewed commit,
+  or leaves a happy, relevant bad/recovery, security/ownership, or regression
+  path incomplete.
 * Changed-file scope contains unexplained work.
 * Human clarification is required.
 

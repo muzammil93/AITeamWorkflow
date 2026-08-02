@@ -12,6 +12,7 @@ Use this document with `saleaura-v1-playwright-e2e-plan.md`. Update it during ea
 * `PENDING_MANUAL_CONFIRMATION` - Automated portion passed; external receipt/confirmation remains.
 * `RETEST_REQUIRED` - A code/configuration fix needs verification.
 * `DEFERRED` - Intentionally excluded with approval.
+* `PLANNED` - CEO-approved test scope; implementation and execution have not started.
 
 ## Active Run Summary
 
@@ -20,7 +21,7 @@ Use this document with `saleaura-v1-playwright-e2e-plan.md`. Update it during ea
 | Current run ID | `RUN-20260718-001` |
 | Target | `STAGING ONLY` |
 | Application version/commit | `183fef4` |
-| Test plan version | `1.1` - F07 inventory repair added; implementation and recorded re-test pending |
+| Test plan version | `1.3` - F16 product/build/modification cart journeys recorded as planned; no F16 implementation or execution yet |
 | Started | `2026-07-18 04:14 PKT` |
 | Finished | `-` |
 | Operator | `Codex` |
@@ -66,6 +67,9 @@ Use this document with `saleaura-v1-playwright-e2e-plan.md`. Update it during ea
 | E2E-030 | OWNER-OTHER | Required | - | NOT_RUN | - | - | - |
 | E2E-031 | Customer/system | Required | - | PASS (unapproved-origin subset) | RUN-20260719-E2E031-001 | `SaleAura-WebApp/test-results/staging-e2e-evidence/e2e-031-unapproved-widget-host-20260719-002/embedded-widget-E2E-031-an-6633a--render-the-widget-launcher-desktop-chromium/video.webm` | An unapproved external origin received `403` from bootstrap and rendered no widget launcher. Fake/expired sessions and rate-limit recovery remain pending catalog-backed coverage. |
 | E2E-032 | All selected | - | Required | NOT_RUN | - | - | - |
+| E2E-033 | CUSTOMER-CART | Required | Required | PLANNED | - | - | F16 normal/boundary product-cart-to-lead journey with editable quantities; no stock reservation, order, or payment action. |
+| E2E-034 | CUSTOMER-CART / OWNER-OTHER | Required | Required | PLANNED | - | - | F16 invalid quantity, cancelled, save-failure, duplicate, session/owner-isolation, and notification-preservation journey. |
+| E2E-035 | CUSTOMER-BUILD / CUSTOMER-CART / OWNER-PAID | Required | Required | PLANNED | - | - | F16 build-to-individual-cart, build-modification separation, post-lead request update, notification, and Dashboard-detail journey. |
 
 ## F07 Inventory Follow-up Register
 

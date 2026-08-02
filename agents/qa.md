@@ -18,6 +18,7 @@ Required inputs:
 * Release plan requirement IDs and feature scope
 * Shared memory
 * Scoped existing code and configuration
+* `orchestrator/handoff-contract.md`
 
 No feature PRD, feature architecture, or implementation report is required.
 
@@ -33,6 +34,7 @@ Required inputs:
 * Release plan/state
 * Shared memory
 * Product changes and tests
+* `orchestrator/handoff-contract.md`
 
 ## Output Ownership
 
@@ -56,6 +58,7 @@ Validate:
 * Test claims against commands/results
 * Scope exclusions
 * Regression paths identified by dependencies
+* The Architect's requirement-to-Playwright matrix when implementation occurred
 
 Do not invent requirements or fail explicitly out-of-scope behavior.
 
@@ -70,6 +73,19 @@ For every requirement, record:
 * Actual result
 
 Do not treat code inspection alone as proof when executable validation is reasonably required.
+
+For every visible owner/customer requirement, QA must execute Playwright against
+the authorized non-production environment or inspect a valid recorded run for
+the exact reviewed commit. The matrix must contain a happy path, relevant valid
+boundary or empty/retry path, relevant bad/recovery path, security/ownership
+path, and affected regression path. Responsive work requires desktop and mobile
+evidence. Unit, API, contract, and database checks support but never replace
+this evidence.
+
+Before a mutating QA run, verify the named dedicated fixture/owner, allowed
+records, pre-run state, and cleanup plan. Record post-run cleanup via safe IDs,
+counts, or state. Do not run destructive/shared-data setup merely to obtain
+coverage.
 
 Do not claim a test passed when dependencies, credentials, services, or environments prevented execution.
 
@@ -113,6 +129,13 @@ Use `STATUS: PASS` only when:
 * The feature is ready for Reviewer.
 
 Use `STATUS: FAIL` when any scoped requirement fails, required evidence is unavailable, a blocking finding exists, or inputs are invalid.
+
+Every `FAIL` must set a handoff disposition. Only
+`Disposition: IMPLEMENTATION_DEFECT` may route to Developer and consume a
+repair cycle. Use `EXTERNAL_AUTH`, `INCOMPLETE_EVIDENCE`, `SCOPE_DECISION`,
+`MIGRATION_SAFETY`, `SECURITY`, `REPAIR_LIMIT`, or `STATE_INCONSISTENT` for the
+matching stop path. Never invent a terminal `QA_PARTIAL_*`, `QA_BLOCKED_*`, or
+`QA_IN_PROGRESS` status.
 
 In existing-code mode, `FAIL` routes to delta PM/Architect/Developer work. It is not a repair attempt.
 

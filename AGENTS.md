@@ -126,6 +126,12 @@ After implementation:
 
 A baseline QA failure in existing-code verification does not consume a repair cycle.
 
+The two-cycle budget is the normal limit, not a silent invitation to extend it.
+An exception requires CEO-approved release-plan change control before work starts.
+It must name the change package, finding IDs, exact approved scope, revised
+budget, expiry, and the fresh QA/Reviewer evidence required. Release state must
+show normal and exceptional repair budgets separately.
+
 ## Release-Train Rule
 
 Only one feature may be active at a time.
@@ -169,6 +175,13 @@ Every workflow artifact must:
 * End with one machine-readable `STATUS:` line.
 * Preserve earlier attempts using `Attempt Result:` rather than additional `STATUS:` lines.
 * Reference stable requirement and finding IDs where available.
+* Follow `orchestrator/handoff-contract.md` when created or materially updated.
+
+The final `STATUS:` line is the terminal result. The handoff metadata records
+the feature key, change package, attempt, disposition, next route, exact inputs,
+and evidence IDs. `FAIL` routes to Developer only for an approved-scope
+implementation defect; blocked access, incomplete evidence, scope decisions,
+and safety concerns stop without consuming a repair cycle.
 
 ## Role Ownership
 
@@ -213,7 +226,7 @@ window open until the storage state is saved and the staging preflight passes.
 
 ## Mandatory Test and Provider Rules
 
-Every implemented or repaired feature must include proportionate automated tests and Playwright coverage before it can be handed to QA. Test coverage must include:
+Every implemented or repaired feature must include proportionate automated tests and Playwright coverage before it can be handed to QA. The Architect maps acceptance criteria to named Playwright coverage; Developer implements and records that coverage; QA independently executes or verifies the recorded evidence against the exact reviewed commit. Test coverage must include:
 
 * Normal/expected user journeys.
 * Valid or “good” boundary cases.
@@ -221,5 +234,18 @@ Every implemented or repaired feature must include proportionate automated tests
 * Regression checks for the shared behavior the feature can affect.
 
 Unit, contract, and integration checks are useful supporting evidence, but they do not replace Playwright. Playwright must verify the visible owner/customer outcome against the real authorized non-production Supabase project through MCP, using dedicated test data and never production data.
+
+QA must record a requirement-to-Playwright matrix with the happy path, relevant
+boundary/empty/retry path, relevant bad or recovery path, security/ownership
+path, and affected regression path. Responsive customer or owner changes require
+desktop and mobile evidence. A missing account, provider action, fixture, or
+environment is a blocked QA failure, never a pass. Provider-hosted steps that
+cannot be automated require explicit CEO-approved manual-smoke evidence.
+
+Before a mutating Playwright run, record the dedicated owner/fixture, allowed
+records, expected mutation, pre-run state, and cleanup plan. Do not use broad
+deletes, resets, or profile/plan changes against shared owner data. Verify
+post-run cleanup using safe identifiers, counts, or state before the run is
+recorded as complete.
 
 Polar is the only permitted payment provider for SaleAura payment, subscription, checkout, webhook, and portal testing. Do not substitute a fake payment database, Flask route, or another payment provider as test proof. Any Polar chargeable or production-facing action still requires the CEO authorization already required by this workflow.

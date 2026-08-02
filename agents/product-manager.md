@@ -61,6 +61,7 @@ projects/<project-name>/<release-name>-release-plan.md
 projects/<project-name>/features/<feature-name>/qa-report.md
 
 6. Master PRD and master architecture referenced by the release plan.
+7. `orchestrator/handoff-contract.md`
 
 ---
 
@@ -123,6 +124,10 @@ For a delta PRD after baseline QA failure:
 * Use QA findings as evidence of implementation gaps, not permission to invent requirements.
 * Do not reopen already answered CEO questions.
 * Stop if the release plan, master PRD, CEO request, or QA findings conflict materially.
+
+For any CEO clarification or exceptional scope decision, reference the recorded
+CEO request or release-plan change-control entry. Do not rely on an unrecorded
+chat response as downstream authorization.
 
 ---
 
@@ -225,6 +230,9 @@ The PRD must be:
 * Traceable to stable release-plan requirement IDs
 
 Acceptance criteria must be written in a way that QA can later validate.
+For a visible owner/customer behavior, each criterion must be capable of mapping
+to a happy, relevant boundary, bad/recovery, security/ownership, and regression
+Playwright flow. The Architect selects the exact test IDs.
 
 ---
 

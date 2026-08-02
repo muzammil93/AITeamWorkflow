@@ -59,6 +59,8 @@ projects/<project-name>/<release-name>-release-plan.md
 
 projects/<project-name>/features/<feature-name>/qa-report.md
 
+6. `orchestrator/handoff-contract.md`
+
 ---
 
 ## Output
@@ -130,9 +132,16 @@ Include:
 * Security considerations
 * Error handling expectations
 * Testing guidance
+* A requirement-to-Playwright acceptance matrix for visible owner/customer work
 * Dependency assumptions
 * Migration validation and rollback/forward-fix guidance where applicable
 * Git/change-boundary guidance
+
+The Playwright matrix must name the applicable existing or new test IDs and
+cover happy, relevant boundary/empty/retry, bad/recovery, security/ownership,
+and affected regression paths. Require desktop and mobile coverage for changed
+responsive journeys. Name the dedicated staging fixture/owner and cleanup
+expectation for mutating tests; do not authorize broad shared-data cleanup.
 
 Do not write full production code.
 

@@ -4,21 +4,21 @@
 
 Release ID: `SALEAURA-V1`
 
-Release-plan version: `1.0`
+Release-plan version: `1.4`
 
 State owner: Orchestrator
 
-Last reconciliation: 2026-07-21 (Asia/Karachi) — documentation-only reconciliation against the E2E tracker through 2026-07-19; F07 live-validation risk retained and the release E2E run remains incomplete
+Last reconciliation: 2026-08-01 (Asia/Karachi) — F16 CC-005 routing-boundary repair passed QA and Reviewer; feature evidence is ready for CEO review
 
 Overall state: `RELEASE_E2E_IN_PROGRESS`
 
 Current milestone: `M4 — Owner and Launch Readiness`
 
-Current feature: `F15 — Integrated Production-Readiness Gate`
+Current feature: `F16 — Conversational Product Selection and Cart Confirmation`
 
-Feature lock: Locked to `F15`
+Feature lock: Locked to `F16`
 
-Next eligible feature: F15, per CEO authorization with F07's recorded live-validation risk retained
+Next eligible feature: Complete the approved F16 conversational-selection delta, then resume parent F16 QA before F15
 
 ## State Dimensions
 
@@ -43,7 +43,8 @@ Workflow, code, database, and production states are tracked separately. No state
 | F12 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | STAGING_VALIDATED | 0/2 | PASS | APPROVED | READY | — |
 | F13 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 0/2 | PASS | APPROVED | READY | — |
 | F14 | QA_FIRST | FINAL_REPORT_READY | INTEGRATED | NOT_REQUIRED | 0/2 | PASS | APPROVED | READY | — |
-| F15 | QA_FIRST | QA_BASELINE_PENDING | EXISTING_UNVERIFIED | NOT_REQUIRED | 0/2 | — | — | — | F07 live Google Sheets validation deferred by CEO |
+| F15 | QA_FIRST | QA_BASELINE_PENDING | EXISTING_UNVERIFIED | NOT_REQUIRED | 0/2 | — | — | — | F07 live Google Sheets validation deferred by CEO; final gate now also depends on F16 |
+| F16 | QA_FIRST | CONVERSATIONAL_SELECTION_FINAL_REPORT_READY | INTEGRATED | STAGING_VALIDATED | 4/4 | PASS | APPROVED | READY | CC-005 closed `F16-CPS-REV-003`; F15 remains dependent on parent F16/release E2E completion |
 
 ## Milestone Ledger
 
@@ -52,7 +53,7 @@ Workflow, code, database, and production states are tracked separately. No state
 | M1 Platform Foundation | APPROVED | F00–F02 | Approved 2026-07-03 |
 | M2 Catalog and Inventory | IN_PROGRESS | F03–F07 | Pending |
 | M3 Customer Intelligence | IMPLEMENTATION_COMPLETE_E2E_PENDING | F08–F12 | Pending release E2E evidence |
-| M4 Owner and Launch Readiness | IN_PROGRESS | F13–F15 | F13–F14 final reports are ready; F15 and release E2E evidence remain pending |
+| M4 Owner and Launch Readiness | IN_PROGRESS | F13–F16, F15 | F13–F14 and the F16 processing-status delta have final reports; conversational selection, parent F16 QA, F15, and release E2E evidence remain pending |
 
 ## Release E2E Reconciliation
 
@@ -188,6 +189,944 @@ All F01 findings `F01-QA-001` through `F01-QA-007` are verified. No open F01 fin
 Known audit findings remain assigned through the release plan, including lead RLS, unrestricted chat/payment writes, public raw inventory/embedding access, exposed functions, allowed-domain absence, and missing V1 schema capabilities.
 
 ## Transition Log
+
+### T-114
+
+Date: 2026-08-01 (Asia/Karachi)
+
+Actor: Reviewer / Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_REPAIR_4_REVIEWER_RUNNING`
+
+To: `F16_CONVERSATIONAL_SELECTION_FINAL_REPORT_READY`
+
+Evidence:
+
+* Product repair `22b84fa`.
+* Developer implementation evidence `453c294`.
+* Fresh QA PASS `b36dd91`: focused router-gate tests and a no-retry
+  ten-conversation staging assistant-response audit.
+* Reviewer APPROVED `1c2f4a4`: `F16-CPS-REV-003` closed.
+
+Reason:
+
+The generic/general/lead router now runs only after a validated
+`no_action/not_product_action` release. Trusted product actions and fail-closed
+product reasons stay on the product path. No broader scope was changed.
+
+### T-113
+
+Date: 2026-08-01 (Asia/Karachi)
+
+Actor: CEO / Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_REPAIR_LIMIT_EXHAUSTED`
+
+To: `F16_CONVERSATIONAL_SELECTION_REPAIR_4_DEVELOPER_RUNNING`
+
+Evidence:
+
+* CEO response in the active Codex thread: `You have my approval. Fix it`.
+* Release-plan change control `CC-005`.
+* Open High finding `F16-CPS-REV-003` from review checkpoint `3760e80`.
+
+Reason:
+
+Authorize one final narrowly bounded repair: product-action handling must gate
+the generic/general/lead router before its result is applied. The required
+follow-on path is Developer → fresh QA → Reviewer; no broader F16 or external
+scope is authorized.
+
+### T-112
+
+Date: 2026-08-01 (Asia/Karachi)
+
+Actor: Reviewer / Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_REPAIR_3_REVIEWER_RUNNING`
+
+To: `F16_CONVERSATIONAL_SELECTION_REPAIR_LIMIT_EXHAUSTED`
+
+Evidence:
+
+* Product checkpoint `39edc8a`.
+* Independent QA `PASS`, committed at `0257110`, including one fresh
+  ten-conversation staging audit with customer-response review.
+* Reviewer `CHANGES_REQUIRED`, committed at `3760e80` and normalized at
+  `b635919`.
+* New High finding `F16-CPS-REV-003`: the generic/general/lead router is
+  invoked before a trusted product-action result is applied.
+* No unsafe cart or lead mutation was observed in the reviewed evidence.
+
+Reason:
+
+The exceptional third repair has completed its Developer → QA → Reviewer path.
+Although independent QA passed, the Reviewer found a remaining release-blocking
+no-fallthrough architecture violation. The recorded allowance is 3/3, so no
+further product repair may start without a fresh CEO authorization.
+
+### T-111
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Architect / Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_REPAIR_3_ARCHITECT_RUNNING`
+
+To: `F16_CONVERSATIONAL_SELECTION_REPAIR_3_DEVELOPER_RUNNING`
+
+Evidence:
+
+* PRD ending `STATUS: PRD_READY`.
+* Architecture ending `STATUS: ARCHITECTURE_READY`.
+* Exceptional-cycle planning checkpoint `f7e3260`.
+
+Reason:
+
+Route only the approved state-mode LLM routing and trusted product-prose
+currency grounding delta to Developer. Cart, Next, database, lead workflow,
+search ranking, deployment, and production remain out of scope.
+
+### T-110
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Product Manager / Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_REPAIR_3_PM_RUNNING`
+
+To: `F16_CONVERSATIONAL_SELECTION_REPAIR_3_ARCHITECT_RUNNING`
+
+Evidence:
+
+* PRD requirements `CPS-022` through `CPS-026`.
+* PRD ending `STATUS: PRD_READY`.
+
+Reason:
+
+The exceptional scope now explicitly requires state-specific typed LLM
+authority, fail-closed grounded routing, trusted prose/card currency equality,
+and a fresh ten-clean-session first-run audit. Route only that delta to
+Architect.
+
+### T-109
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: CEO / Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_CEO_DECISION_REQUIRED`
+
+To: `F16_CONVERSATIONAL_SELECTION_REPAIR_3_PM_RUNNING`
+
+Evidence:
+
+* CEO response in the active Codex thread: `Yes approved from my side`.
+* Release-plan change control `CC-004`.
+* CEO-request exceptional-repair addendum.
+
+Reason:
+
+Authorize one exceptional third repair cycle and explicitly include trusted
+assistant prose currency grounding within F16. Route the delta through PM,
+Architect, Developer, fresh QA including ten first-run conversations, and
+Reviewer. No other scope, deployment, or production mutation is authorized.
+
+### T-108
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_REPAIR_LIMIT_EXHAUSTED`
+
+To: `F16_CONVERSATIONAL_SELECTION_CEO_DECISION_REQUIRED`
+
+Evidence:
+
+* QA-owned 10-conversation audit and open High findings
+  `F16-CPS-QA-003` and `F16-CPS-QA-004`.
+* Read-only file handoff completed to Product Manager, Architect, Developer,
+  and Reviewer.
+* PM disposition: `QA-003` is an existing-scope implementation defect;
+  `QA-004` conflicts with explicit F16 currency exclusions and requires CEO
+  classification.
+* Architect, Developer, and Reviewer dispositions: no phrase catalogue or cart
+  redesign; use state-specific typed LLM semantics plus trusted prose-currency
+  validation if a new cycle is authorized.
+
+Reason:
+
+The agentic team has reviewed the qualitative findings. Product changes remain
+blocked because the controlled repair allowance is exhausted and the currency
+finding needs a higher-priority scope decision.
+
+### T-107
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_QA_ATTEMPT_3_RUNNING`
+
+To: `F16_CONVERSATIONAL_SELECTION_REPAIR_LIMIT_EXHAUSTED`
+
+Evidence:
+
+* QA report ending `STATUS: FAIL`.
+* Reviewer findings `F16-CPS-REV-001` and `F16-CPS-REV-002` verified.
+* High finding `F16-CPS-QA-003` open: natural conversational references can
+  divert to lead capture, silently choose an ambiguous card, or hallucinate
+  internal candidate-position wording.
+* High finding `F16-CPS-QA-004` open: assistant prose can contradict trusted
+  PKR cards with Philippine-peso or Nigerian-naira symbols.
+* Dedicated 10-conversation assistant-response audit completed.
+* Repair count `2/2`.
+
+Reason:
+
+Functional atomicity and typed recovery pass, but qualitative assistant
+behavior remains release-blocking. The controlled workflow forbids silently
+dispatching a third repair; explicit CEO authorization or scope direction is
+required before further product changes.
+
+### T-106
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_REPAIR_2_COMPLETE`
+
+To: `F16_CONVERSATIONAL_SELECTION_QA_ATTEMPT_3_RUNNING`
+
+Evidence:
+
+* Frozen product head `c94257d`.
+* `F16-CPS-REV-001` and `F16-CPS-REV-002` states
+  `FIXED_PENDING_VERIFICATION`.
+
+Reason:
+
+Route the final bounded repair to independent QA for atomicity, typed recovery,
+permission, staging-browser, and regression verification.
+
+### T-105
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Developer / Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_REPAIR_2_DEVELOPER_RUNNING`
+
+To: `F16_CONVERSATIONAL_SELECTION_REPAIR_2_COMPLETE`
+
+Evidence:
+
+* Product commit `c94257d`.
+* Implementation-report evidence commit `515283e`.
+* 31 affected Python tests, 30 F16 Vitest tests, TypeScript, and diff checks
+  passed.
+* Service-role-only staging atomic functions verified.
+* Primary and deterministic expired-recovery Playwright journeys passed.
+
+Reason:
+
+All cart-state writers now share bounded atomic transitions, and terminal
+confirmation failures persist typed results for localized safe continuation.
+
+### T-104
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_REVIEW_CHANGES_REQUIRED`
+
+To: `F16_CONVERSATIONAL_SELECTION_REPAIR_2_DEVELOPER_RUNNING`
+
+Evidence:
+
+* Open High finding `F16-CPS-REV-001`.
+* Open Medium finding `F16-CPS-REV-002`.
+* Bounded repair allowance `2/2`.
+
+Reason:
+
+Route only shared cart-state CAS safety and typed confirmation-recovery
+continuation to Developer. All previously verified behavior remains frozen.
+
+### T-103
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Reviewer / Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_REVIEWER_RUNNING`
+
+To: `F16_CONVERSATIONAL_SELECTION_REVIEW_CHANGES_REQUIRED`
+
+Evidence:
+
+* Review report ending `STATUS: CHANGES_REQUIRED`.
+* High finding `F16-CPS-REV-001`.
+* Medium finding `F16-CPS-REV-002`.
+* Independent Reviewer checks: 29 Python tests, 26 Vitest tests, TypeScript,
+  and diff safety passed.
+
+Reason:
+
+Blind full-state writers can race with confirmation consumption, and two
+confirmation failure paths bypass the required typed localized continuation.
+Both findings are release-blocking despite the prior QA pass.
+
+### T-102
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_QA_ATTEMPT_2_PASS`
+
+To: `F16_CONVERSATIONAL_SELECTION_REVIEWER_RUNNING`
+
+Evidence:
+
+* QA report ending `STATUS: PASS`.
+* Frozen product head `97eb41f`.
+* `F16-CPS-QA-001` state `VERIFIED`.
+
+Reason:
+
+Route the QA-passed implementation and evidence to the locked Reviewer role.
+Final reporting remains gated on review approval.
+
+### T-101
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_QA_ATTEMPT_2_RUNNING`
+
+To: `F16_CONVERSATIONAL_SELECTION_QA_ATTEMPT_2_PASS`
+
+Evidence:
+
+* 29 affected Python tests passed.
+* 26 F16 Vitest tests passed.
+* TypeScript and diff checks passed.
+* Expanded F16 Playwright: `2/2 PASS`.
+* Shared status, search, build, cart, and lead regressions passed, including
+  bounded rerun of fail-closed LLM search variability.
+* Staging cleanup verified.
+
+Reason:
+
+The repaired committed matrix and independent staging evidence verify the
+original High coverage finding. The remaining Low test-hygiene observation is
+documented and non-blocking.
+
+### T-100
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_REPAIR_1_COMPLETE`
+
+To: `F16_CONVERSATIONAL_SELECTION_QA_ATTEMPT_2_RUNNING`
+
+Evidence:
+
+* Frozen product head `97eb41f`.
+* `F16-CPS-QA-001` state `FIXED_PENDING_VERIFICATION`.
+
+Reason:
+
+Return the test-only repair to independent QA. QA must verify the expanded
+matrix and judge the explicitly documented staging-LLM limitations.
+
+### T-099
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Developer / Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_REPAIR_1_DEVELOPER_RUNNING`
+
+To: `F16_CONVERSATIONAL_SELECTION_REPAIR_1_COMPLETE`
+
+Evidence:
+
+* Product test-only commit `97eb41f`.
+* Implementation-report evidence commit `0106e1d`.
+* Developer checks: 8 Python tests, 26 Vitest tests, TypeScript, diff safety,
+  and the expanded primary staging Playwright scenario passed.
+
+Reason:
+
+The missing deterministic and customer-visible coverage was expanded without
+changing runtime behavior. Remaining model-flaky UI paths are documented for
+independent verification rather than hidden behind a brittle committed gate.
+
+### T-098
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_QA_FAIL`
+
+To: `F16_CONVERSATIONAL_SELECTION_REPAIR_1_DEVELOPER_RUNNING`
+
+Evidence:
+
+* Open High finding `F16-CPS-QA-001`.
+* Bounded repair allowance `1/2`.
+
+Reason:
+
+Route only the missing automated and customer-visible coverage matrix to
+Developer. Product behavior must remain unchanged unless a new test proves a
+functional defect.
+
+### T-097
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_QA_RUNNING`
+
+To: `F16_CONVERSATIONAL_SELECTION_QA_FAIL`
+
+Evidence:
+
+* QA report ending `STATUS: FAIL`.
+* High finding `F16-CPS-QA-001`.
+* Local gates and the focused authorized staging Playwright journey passed; no
+  stable runtime defect was observed.
+
+Reason:
+
+The frozen implementation lacks committed coverage for the complete
+customer-visible matrix required by `CPS-021`; QA cannot certify the feature
+until that evidence is added and independently rerun.
+
+### T-096
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_IMPLEMENTATION_COMPLETE`
+
+To: `F16_CONVERSATIONAL_SELECTION_QA_RUNNING`
+
+Evidence:
+
+* Frozen product head `e7151ea`.
+* Implementation report ending `STATUS: IMPLEMENTATION_COMPLETE`.
+* Developer verification: 27 Python tests, 25 Vitest tests, TypeScript, and the authorized staging Playwright journey passed.
+
+Reason:
+
+Route the independently testable implementation to QA. Product code is frozen
+for this QA attempt; Reviewer and final-report gates remain closed.
+
+### T-095
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Developer / Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_DEVELOPER_RUNNING`
+
+To: `F16_CONVERSATIONAL_SELECTION_IMPLEMENTATION_COMPLETE`
+
+Evidence:
+
+* Product implementation commit `e73fac4`.
+* Focused repair commit `e7151ea`.
+* `projects/saleaura/features/f16-conversational-product-selection/implementation-report.md`.
+
+Reason:
+
+The LLM-driven typed action contract, trusted offer validation, confirmation
+boundary, idempotent cart mutation, preview parity, and greeting/name safeguard
+are implemented and developer-verified without adding a static phrase catalog.
+
+### T-094
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_CONVERSATIONAL_SELECTION_APPROVED`
+
+To: `F16_CONVERSATIONAL_SELECTION_DEVELOPER_RUNNING`
+
+Evidence:
+
+* PRD ending `STATUS: PRD_READY`.
+* Architecture ending `STATUS: ARCHITECTURE_READY`.
+* Release-plan change control `CC-003`.
+* Planning checkpoint `9bd6ac7`.
+
+Reason:
+
+Route only the approved LLM structured-action, trusted selection confirmation,
+exactly-once cart execution, preview parity, and name-extraction safeguard to
+Developer. QA, review, deployment, and production remain gated.
+
+### T-093
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: CEO / Orchestrator
+
+From: `F16_STATUS_DELTA_FINAL_REPORT_READY`
+
+To: `F16_CONVERSATIONAL_SELECTION_APPROVED`
+
+Evidence:
+
+* CEO request ending `STATUS: CEO_REQUEST_RECORDED`.
+* CEO approval in the active Codex thread:
+  `This is exactly what I was thinking... Review your plan now and fix the issue`.
+* `projects/saleaura/features/f16-conversational-product-selection/prd.md`.
+* `projects/saleaura/features/f16-conversational-product-selection/architecture.md`.
+* Release-plan change control `CC-003`.
+
+Reason:
+
+Approve semantic LLM understanding without a static phrase catalogue while
+keeping visible-order resolution, confirmation, inventory/cart authority, and
+exactly-once execution inside trusted code.
+
+### T-092
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_STATUS_DELTA_REVIEW_APPROVED`
+
+To: `F16_STATUS_DELTA_FINAL_REPORT_READY`
+
+Evidence:
+
+* `projects/saleaura/features/f16-chat-processing-statuses-proposal/final-report.md`.
+* Final report ending `STATUS: READY_FOR_CEO_REVIEW`.
+* Product commits `624bdf5`, `0e204f5`, and final frozen head `ec168ac`.
+* QA `PASS`, Reviewer `APPROVED`, and QA-001, REV-001, and REV-002 verified.
+
+Reason:
+
+Generate the reconciled completion record for the approved status delta and
+return control to the parent F16 QA workflow without claiming the complete
+SaleAura release or parent feature is finished.
+
+### T-091
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Reviewer / Orchestrator
+
+From: `F16_STATUS_DELTA_REVIEWER_ATTEMPT_2_RUNNING`
+
+To: `F16_STATUS_DELTA_REVIEW_APPROVED`
+
+Evidence:
+
+* Review report Attempt 2 ending `STATUS: APPROVED`.
+* `F16-STATUS-PROPOSAL-REV-001`: `VERIFIED`.
+* `F16-STATUS-PROPOSAL-REV-002`: `VERIFIED`.
+* `F16-STATUS-PROPOSAL-QA-001`: remains `VERIFIED`.
+* Final frozen product commit `ec168ac8518a6da7c30f079bb943d6367e6afb84`.
+
+Reason:
+
+The final bounded repair satisfies terminal-result compatibility, correlation-
+ID safety, request-local concurrency, architecture, scope, performance, and
+maintainability requirements with no open finding.
+
+### T-090
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_STATUS_DELTA_QA_ATTEMPT_3_PASS`
+
+To: `F16_STATUS_DELTA_REVIEWER_ATTEMPT_2_RUNNING`
+
+Evidence:
+
+* QA report Attempt 3 ending `STATUS: PASS`.
+* Reviewer findings `REV-001` and `REV-002` independently verified.
+
+Reason:
+
+Return the final repair, QA evidence, and historical Reviewer findings to the
+Reviewer role for the required closing verdict.
+
+### T-089
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `F16_STATUS_DELTA_QA_ATTEMPT_3_RUNNING`
+
+To: `F16_STATUS_DELTA_QA_ATTEMPT_3_PASS`
+
+Evidence:
+
+* QA report ending `STATUS: PASS`.
+* `F16-STATUS-PROPOSAL-QA-001`, `REV-001`, and `REV-002` states `VERIFIED`.
+* 32/32 backend tests, 34/34 frontend tests, TypeScript, focused staging, product-card, and four-purpose build QA passed.
+
+Reason:
+
+The final repair satisfies the terminal-frame, trace-ID, concurrency, visible
+loader, and affected regression gates with no blocker.
+
+### T-088
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_STATUS_DELTA_REPAIR_2_COMPLETE`
+
+To: `F16_STATUS_DELTA_QA_ATTEMPT_3_RUNNING`
+
+Evidence:
+
+* Repair commit `ec168ac8518a6da7c30f079bb943d6367e6afb84`.
+* Reviewer findings marked `FIXED_PENDING_VERIFICATION` in implementation Attempt 3.
+
+Reason:
+
+Route the exact terminal-frame, request-ID, compatibility, security, and
+visible staging regressions to independent QA.
+
+### T-087
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Developer / Orchestrator
+
+From: `F16_STATUS_DELTA_REPAIR_2_DEVELOPER_RUNNING`
+
+To: `F16_STATUS_DELTA_REPAIR_2_COMPLETE`
+
+Evidence:
+
+* Repair commit `ec168ac8518a6da7c30f079bb943d6367e6afb84`.
+* Implementation-report Attempt 3 ending `STATUS: IMPLEMENTATION_COMPLETE`.
+* `REV-001` and `REV-002` marked `FIXED_PENDING_VERIFICATION`.
+
+Reason:
+
+The final allowed repair completed with focused protocol, security, regression,
+type, and staging checks and no blocker.
+
+### T-086
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_STATUS_DELTA_REVIEW_CHANGES_REQUIRED`
+
+To: `F16_STATUS_DELTA_REPAIR_2_DEVELOPER_RUNNING`
+
+Evidence:
+
+* Open Reviewer findings `F16-STATUS-PROPOSAL-REV-001` and `REV-002`.
+* Repair count incremented from `1/2` to `2/2`.
+* Both findings remain inside the approved architecture and require no CEO decision.
+
+Reason:
+
+Route only terminal-result frame compatibility, trace/request-ID validation,
+and affected regressions to the final bounded Developer repair.
+
+### T-085
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Reviewer / Orchestrator
+
+From: `F16_STATUS_DELTA_REVIEWER_RUNNING`
+
+To: `F16_STATUS_DELTA_REVIEW_CHANGES_REQUIRED`
+
+Evidence:
+
+* Review report ending `STATUS: CHANGES_REQUIRED`.
+* High finding `F16-STATUS-PROPOSAL-REV-001`.
+* Medium finding `F16-STATUS-PROPOSAL-REV-002`.
+
+Reason:
+
+Valid terminal responses above 16 KiB can be discarded, and client correlation
+IDs need bounded normalization before SSE frames, headers, and logs.
+
+### T-084
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_STATUS_DELTA_QA_PASS`
+
+To: `F16_STATUS_DELTA_REVIEWER_RUNNING`
+
+Evidence:
+
+* QA report ending `STATUS: PASS`.
+* No open QA finding.
+* Frozen product commits `624bdf5` and `0e204f5`.
+
+Reason:
+
+Route the approved scope, architecture, implementation attempts, QA evidence,
+and changed code to independent Reviewer.
+
+### T-083
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `F16_STATUS_DELTA_QA_ATTEMPT_2_RUNNING`
+
+To: `F16_STATUS_DELTA_QA_PASS`
+
+Evidence:
+
+* QA report Attempt 2 ending `STATUS: PASS`.
+* `F16-STATUS-PROPOSAL-QA-001` state `VERIFIED`.
+* 29/29 backend regressions, 27/27 Vitest checks, TypeScript, focused and critical staging Playwright, JSON compatibility, and live concurrent request evidence passed.
+
+Reason:
+
+All `CHAT-STATUS-001` through `CHAT-STATUS-012` requirements pass with no open
+Critical, High, Medium, or Low finding.
+
+### T-082
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_STATUS_DELTA_REPAIR_1_COMPLETE`
+
+To: `F16_STATUS_DELTA_QA_ATTEMPT_2_RUNNING`
+
+Evidence:
+
+* Repair commit `0e204f50216cb3197e08e623b50163040a4da27c`.
+* Finding state `FIXED_PENDING_VERIFICATION` in implementation Attempt 2.
+
+Reason:
+
+Route the original concurrency reproduction and all affected status/chat
+regressions back to independent QA.
+
+### T-081
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Developer / Orchestrator
+
+From: `F16_STATUS_DELTA_REPAIR_1_DEVELOPER_RUNNING`
+
+To: `F16_STATUS_DELTA_REPAIR_1_COMPLETE`
+
+Evidence:
+
+* Repair commit `0e204f50216cb3197e08e623b50163040a4da27c`.
+* Implementation-report Attempt 2 ending `STATUS: IMPLEMENTATION_COMPLETE`.
+* `F16-STATUS-PROPOSAL-QA-001` marked `FIXED_PENDING_VERIFICATION`.
+
+Reason:
+
+The cached engine no longer stores request-derived reporter, intent, or
+language state; deterministic concurrent tests are ready for QA verification.
+
+### T-080
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_STATUS_DELTA_QA_FAIL`
+
+To: `F16_STATUS_DELTA_REPAIR_1_DEVELOPER_RUNNING`
+
+Evidence:
+
+* Open High finding `F16-STATUS-PROPOSAL-QA-001`.
+* Repair count incremented from `0/2` to `1/2`.
+* Approved PRD and architecture remain valid for request-local status isolation.
+
+Reason:
+
+Route only the concurrent same-owner status-isolation defect and affected
+regressions to Developer under bounded repair.
+
+### T-079
+
+Date: 2026-07-30 (Asia/Karachi)
+
+Actor: QA / Orchestrator
+
+From: `F16_STATUS_DELTA_QA_RUNNING`
+
+To: `F16_STATUS_DELTA_QA_FAIL`
+
+Evidence:
+
+* `projects/saleaura/features/f16-chat-processing-statuses-proposal/qa-report.md` ending `STATUS: FAIL`.
+* High finding `F16-STATUS-PROPOSAL-QA-001`.
+* All other scoped requirements and staging browser checks passed.
+
+Reason:
+
+Concurrent requests for the same cached owner engine can publish request A's
+stages through request B's reporter, violating truthful same-request delivery.
+
+### T-078
+
+Date: 2026-07-29 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_STATUS_DELTA_IMPLEMENTATION_COMPLETE`
+
+To: `F16_STATUS_DELTA_QA_RUNNING`
+
+Evidence:
+
+* Product commit `624bdf5e70f0df88ab3d6d63320b861a05fd6fc6`.
+* `projects/saleaura/features/f16-chat-processing-statuses-proposal/implementation-report.md` ending `STATUS: IMPLEMENTATION_COMPLETE`.
+
+Reason:
+
+Freeze the Developer result and route the approved requirements, architecture,
+implementation report, and product commit to independent QA.
+
+### T-077
+
+Date: 2026-07-29 (Asia/Karachi)
+
+Actor: Developer / Orchestrator
+
+From: `F16_STATUS_DELTA_DEVELOPER_RUNNING`
+
+To: `F16_STATUS_DELTA_IMPLEMENTATION_COMPLETE`
+
+Evidence:
+
+* Product commit `624bdf5e70f0df88ab3d6d63320b861a05fd6fc6`.
+* Developer unit, contract, type-check, and focused staging Playwright evidence.
+* No database, migration, dependency, provider, deployment, or production change.
+
+Reason:
+
+The approved implementation is complete and ready for independent QA without a
+repair-cycle increment.
+
+### T-076
+
+Date: 2026-07-29 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_STATUS_DELTA_APPROVED`
+
+To: `F16_STATUS_DELTA_DEVELOPER_RUNNING`
+
+Evidence:
+
+* `projects/saleaura/features/f16-chat-processing-statuses-proposal/prd.md` ending `STATUS: PRD_READY`.
+* `projects/saleaura/features/f16-chat-processing-statuses-proposal/architecture.md` ending `STATUS: ARCHITECTURE_READY`.
+* Release-plan change control `CC-002`.
+
+Reason:
+
+Route only the approved backend-driven status delta to Developer. QA, Reviewer,
+release-plan continuation, deployment, and production mutation remain gated.
+
+### T-075
+
+Date: 2026-07-29 (Asia/Karachi)
+
+Actor: CEO / Orchestrator
+
+From: `F16_QA_IN_PROGRESS`
+
+To: `F16_STATUS_DELTA_APPROVED`
+
+Evidence:
+
+* CEO instruction in the active Codex thread: `Approved—implement the F16 status proposal.`
+* Planning checkpoint `121f0fc`.
+* Release-plan change control `CC-002`.
+
+Reason:
+
+Approve the Product Manager and Architect plans for truthful request-scoped
+processing statuses while preserving the Send-button spinner and all explicit
+scope exclusions.
+
+### T-074
+
+Date: 2026-07-26 (Asia/Karachi)
+
+Actor: Orchestrator
+
+From: `F16_CEO_SCOPE_AND_BASELINE_RECORDED`
+
+To: `F16_ARCHITECTURE_READY_DEVELOPER_IN_PROGRESS`
+
+Evidence:
+
+* CEO-approved implementation start in the active Codex thread.
+* `projects/saleaura/features/f16-chat-widget-sales-flow/ceo-request.md`.
+* `projects/saleaura/features/f16-chat-widget-sales-flow/prd.md`.
+* `projects/saleaura/features/f16-chat-widget-sales-flow/architecture.md`.
+* Release-plan change control `CC-001`.
+
+Reason:
+
+The approved F16 dependencies place the readiness gate F15 after F16. The release lock therefore moves to F16, and the stale exclusion of its already approved build-to-cart integration boundary is reconciled with `CC-001`, the feature PRD, and the feature architecture before developer work begins.
+
+### T-073
+
+Date: 2026-07-26 (Asia/Karachi)
+
+Actor: CEO / Orchestrator
+
+From: `F15_QA_BASELINE_PENDING`
+
+To: `F16_CEO_SCOPE_AND_BASELINE_RECORDED`
+
+Evidence:
+
+* CEO-approved cart-to-lead decisions in the active Codex thread.
+* `projects/saleaura/features/f16-chat-widget-sales-flow/ceo-request.md`.
+* `projects/saleaura/features/f16-chat-widget-sales-flow/qa-report.md`.
+* Release-plan change control `CC-001`.
+
+Reason:
+
+The readiness audit identified new customer-cart behavior and existing ChatWidget defects. The new work is separated from F10/F11, remains a non-checkout lead inquiry, and is recorded before any implementation begins.
 
 ### T-001
 
